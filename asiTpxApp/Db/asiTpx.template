@@ -1,0 +1,477 @@
+#=================================================================#
+# Database for the records specific to ASI TPX detectors
+
+include "ADBase.template"
+
+########## Trigger Settings #########
+
+record(mbbo, "$(P)$(R)TriggerMode")
+{
+    field(ZRVL, "0")
+    field(ZRST, "Internal")
+    field(ONVL, "1")
+    field(ONST, "External")
+    field(TWVL, "2")
+    field(TWST, "Software")
+}
+
+record(mbbi, "$(P)$(R)TriggerMode_RBV")
+{
+    field(ZRVL, "0")
+    field(ZRST, "Internal")
+    field(ONVL, "1")
+    field(ONST, "External")
+    field(TWVL, "2")
+    field(TWST, "Software")
+}
+
+record(bo, "$(P)$(R)TriggerSoftware")
+{
+    field(DTYP, "asynInt32")
+    field(OUT,  "@asyn($(PORT),$(ADDR=0),$(TIMEOUT=1))ASI_TRIGGER_SOFT")
+    field(ZNAM, "Stop")
+    field(ONAM, "Start")
+    info(asyn:READBACK, "1")
+}
+
+record(mbbo, "$(P)$(R)ExposureMode")
+{
+    field(PINI, "YES")
+    field(DTYP, "asynInt32")
+    field(OUT,  "@asyn($(PORT),$(ADDR=0),$(TIMEOUT=1))ASI_EXP_MODE")
+    field(ZRVL, "0")
+    field(ZRST, "Timed")
+    field(ONVL, "1")
+    field(ONST, "Trigger width")
+}
+
+record(mbbi, "$(P)$(R)ExposureMode_RBV")
+{
+    field(DTYP, "asynInt32")
+    field(INP,  "@asyn($(PORT),$(ADDR=0),$(TIMEOUT=1))ASI_EXP_MODE")
+    field(ZRVL, "0")
+    field(ZRST, "Timed")
+    field(ONVL, "1")
+    field(ONST, "Trigger width")
+    field(SCAN, "I/O Intr")
+}
+
+record(bo, "$(P)$(R)TriggerPolarity")
+{
+    field(PINI, "YES")
+    field(DTYP, "asynInt32")
+    field(OUT,  "@asyn($(PORT),$(ADDR=0),$(TIMEOUT=1))ASI_TRIGGER_POL")
+    field(ZNAM, "Negative")
+    field(ONAM, "Positive")
+    field(VAL,  "1")
+}
+
+record(bi, "$(P)$(R)TriggerPolarity_RBV")
+{
+    field(DTYP, "asynInt32")
+    field(INP,  "@asyn($(PORT),$(ADDR=0),$(TIMEOUT=1))ASI_TRIGGER_POL")
+    field(ZNAM, "Negative")
+    field(ONAM, "Positive")
+    field(SCAN, "I/O Intr")
+}
+
+record(ao, "$(P)$(R)TriggerDelay")
+{
+    field(PINI, "YES")
+    field(DTYP, "asynFloat64")
+    field(OUT,  "@asyn($(PORT),$(ADDR=0),$(TIMEOUT=1))ASI_TRIGGER_DLY")
+    field(EGU , "s")
+    field(PREC, "6")
+}
+
+record(ai, "$(P)$(R)TriggerDelay_RBV")
+{
+    field(DTYP, "asynFloat64")
+    field(INP,  "@asyn($(PORT),$(ADDR=0),$(TIMEOUT=1))ASI_TRIGGER_DLY")
+    field(EGU , "s")
+    field(PREC, "6")
+    field(SCAN, "I/O Intr")
+}
+
+record(mbbo, "$(P)$(R)TriggerSource")
+{
+    field(PINI, "YES")
+    field(DTYP, "asynInt32")
+    field(OUT,  "@asyn($(PORT),$(ADDR=0),$(TIMEOUT=1))ASI_TRIGGER_IN")
+    field(ZRVL, "0")
+    field(ZRST, "HDMI1-1")
+    field(ONVL, "1")
+    field(ONST, "HDMI1-2")
+    field(TWVL, "2")
+    field(TWST, "HDMI1-3")
+    field(THVL, "3")
+    field(THST, "HDMI2-1")
+    field(FRVL, "4")
+    field(FRST, "HDMI2-2")
+    field(FVVL, "5")
+    field(FVST, "HDMI2-3")
+}
+
+record(mbbi, "$(P)$(R)TriggerSource_RBV")
+{
+    field(DTYP, "asynInt32")
+    field(INP,  "@asyn($(PORT),$(ADDR=0),$(TIMEOUT=1))ASI_TRIGGER_IN")
+    field(ZRVL, "0")
+    field(ZRST, "HDMI1-1")
+    field(ONVL, "1")
+    field(ONST, "HDMI1-2")
+    field(TWVL, "2")
+    field(TWST, "HDMI1-3")
+    field(THVL, "3")
+    field(THST, "HDMI2-1")
+    field(FRVL, "4")
+    field(FRST, "HDMI2-2")
+    field(FVVL, "5")
+    field(FVST, "HDMI2-3")
+    field(SCAN, "I/O Intr")
+}
+
+record(mbbo, "$(P)$(R)TriggerOutput")
+{
+    field(PINI, "YES")
+    field(DTYP, "asynInt32")
+    field(OUT,  "@asyn($(PORT),$(ADDR=0),$(TIMEOUT=1))ASI_TRIGGER_OUT")
+    field(ZRVL, "0")
+    field(ZRST, "HDMI1-1")
+    field(ONVL, "1")
+    field(ONST, "HDMI1-2")
+    field(TWVL, "2")
+    field(TWST, "HDMI1-3")
+    field(THVL, "3")
+    field(THST, "HDMI2-1")
+    field(FRVL, "4")
+    field(FRST, "HDMI2-2")
+    field(FVVL, "5")
+    field(FVST, "HDMI2-3")
+}
+
+record(mbbi, "$(P)$(R)TriggerOutput_RBV")
+{
+    field(DTYP, "asynInt32")
+    field(INP,  "@asyn($(PORT),$(ADDR=0),$(TIMEOUT=1))ASI_TRIGGER_OUT")
+    field(ZRVL, "0")
+    field(ZRST, "HDMI1-1")
+    field(ONVL, "1")
+    field(ONST, "HDMI1-2")
+    field(TWVL, "2")
+    field(TWST, "HDMI1-3")
+    field(THVL, "3")
+    field(THST, "HDMI2-1")
+    field(FRVL, "4")
+    field(FRST, "HDMI2-2")
+    field(FVVL, "5")
+    field(FVST, "HDMI2-3")
+    field(SCAN, "I/O Intr")
+}
+
+########## Detector Health #########
+
+record(ai, "$(P)$(R)LocalTemperature_RBV")
+{
+    field(DTYP, "asynFloat64")
+    field(INP,  "@asyn($(PORT),$(ADDR=0),$(TIMEOUT=1))ASI_TEMP_LOC")
+    field(EGU , "C")
+    field(PREC, "1")
+    field(SCAN, "I/O Intr")
+}
+
+record(ai, "$(P)$(R)FPGATemperature_RBV")
+{
+    field(DTYP, "asynFloat64")
+    field(INP,  "@asyn($(PORT),$(ADDR=0),$(TIMEOUT=1))ASI_TEMP_FPGA")
+    field(EGU , "C")
+    field(PREC, "1")
+    field(SCAN, "I/O Intr")
+}
+
+record(ai, "$(P)$(R)Humidity_RBV")
+{
+    field(DTYP, "asynFloat64")
+    field(INP,  "@asyn($(PORT),$(ADDR=0),$(TIMEOUT=1))ASI_HUMIDITY")
+    field(EGU , "%")
+    field(PREC, "1")
+    field(SCAN, "I/O Intr")
+}
+
+record(stringin, "$(P)$(R)ChipsTemperature_RBV")
+{
+    field(DTYP, "asynOctetRead")
+    field(INP,  "@asyn($(PORT),$(ADDR=0),$(TIMEOUT=1))ASI_TEMP_CHIPS")
+    field(SCAN, "I/O Intr")
+}
+
+record(stringin, "$(P)$(R)FansSpeed_RBV")
+{
+    field(DTYP, "asynOctetRead")
+    field(INP,  "@asyn($(PORT),$(ADDR=0),$(TIMEOUT=1))ASI_FANS_SPEED")
+    field(SCAN, "I/O Intr")
+}
+
+########## Data Output #########
+
+record(bo, "$(P)$(R)RawEnable")
+{
+    field(PINI, "YES")
+    field(DTYP, "asynInt32")
+    field(OUT,  "@asyn($(PORT),$(ADDR=0),$(TIMEOUT=1))ASI_RAW_ENABLE")
+    field(ZNAM, "No")
+    field(ONAM, "Yes")
+    field(VAL,  "0")
+}
+record(bi, "$(P)$(R)RawEnable_RBV")
+{
+    field(DTYP, "asynInt32")
+    field(INP,  "@asyn($(PORT),$(ADDR=0),$(TIMEOUT=1))ASI_RAW_ENABLE")
+    field(ZNAM, "No")
+    field(ONAM, "Yes")
+    field(SCAN, "I/O Intr")
+}
+
+record(waveform, "$(P)$(R)RawFilePath")
+{
+    field(PINI, "YES")
+    field(DTYP, "asynOctetWrite")
+    field(INP,  "@asyn($(PORT),$(ADDR=0),$(TIMEOUT=1))ASI_RAW_PATH")
+    field(FTVL, "CHAR")
+    field(NELM, "256")
+}
+
+record(waveform, "$(P)$(R)RawFilePath_RBV")
+{
+    field(DTYP, "asynOctetRead")
+    field(INP,  "@asyn($(PORT),$(ADDR=0),$(TIMEOUT=1))ASI_RAW_PATH")
+    field(FTVL, "CHAR")
+    field(NELM, "256")
+    field(SCAN, "I/O Intr")
+}
+
+record(waveform, "$(P)$(R)RawFileTemplate")
+{
+    field(PINI, "YES")
+    field(DTYP, "asynOctetWrite")
+    field(INP,  "@asyn($(PORT),$(ADDR=0),$(TIMEOUT=1))ASI_RAW_TEMPLATE")
+    field(FTVL, "CHAR")
+    field(NELM, "256")
+}
+
+record(waveform, "$(P)$(R)RawFileTemplate_RBV")
+{
+    field(DTYP, "asynOctetRead")
+    field(INP,  "@asyn($(PORT),$(ADDR=0),$(TIMEOUT=1))ASI_RAW_TEMPLATE")
+    field(FTVL, "CHAR")
+    field(NELM, "256")
+    field(SCAN, "I/O Intr")
+}
+
+record(bo, "$(P)$(R)ImageEnable")
+{
+    field(PINI, "YES")
+    field(DTYP, "asynInt32")
+    field(OUT,  "@asyn($(PORT),$(ADDR=0),$(TIMEOUT=1))ASI_IMG_ENABLE")
+    field(ZNAM, "No")
+    field(ONAM, "Yes")
+    field(VAL,  "0")
+}
+record(bi, "$(P)$(R)ImageEnable_RBV")
+{
+    field(DTYP, "asynInt32")
+    field(INP,  "@asyn($(PORT),$(ADDR=0),$(TIMEOUT=1))ASI_IMG_ENABLE")
+    field(ZNAM, "No")
+    field(ONAM, "Yes")
+    field(SCAN, "I/O Intr")
+}
+
+record(waveform, "$(P)$(R)ImageFilePath")
+{
+    field(PINI, "YES")
+    field(DTYP, "asynOctetWrite")
+    field(INP,  "@asyn($(PORT),$(ADDR=0),$(TIMEOUT=1))ASI_IMG_PATH")
+    field(FTVL, "CHAR")
+    field(NELM, "256")
+}
+
+record(waveform, "$(P)$(R)ImageFilePath_RBV")
+{
+    field(DTYP, "asynOctetRead")
+    field(INP,  "@asyn($(PORT),$(ADDR=0),$(TIMEOUT=1))ASI_IMG_PATH")
+    field(FTVL, "CHAR")
+    field(NELM, "256")
+    field(SCAN, "I/O Intr")
+}
+
+record(waveform, "$(P)$(R)ImageFileTemplate")
+{
+    field(PINI, "YES")
+    field(DTYP, "asynOctetWrite")
+    field(INP,  "@asyn($(PORT),$(ADDR=0),$(TIMEOUT=1))ASI_IMG_TEMPLATE")
+    field(FTVL, "CHAR")
+    field(NELM, "256")
+}
+
+record(waveform, "$(P)$(R)ImageFileTemplate_RBV")
+{
+    field(DTYP, "asynOctetRead")
+    field(INP,  "@asyn($(PORT),$(ADDR=0),$(TIMEOUT=1))ASI_IMG_TEMPLATE")
+    field(FTVL, "CHAR")
+    field(NELM, "256")
+    field(SCAN, "I/O Intr")
+}
+
+record(mbbo, "$(P)$(R)PixelMode")
+{
+    field(PINI, "YES")
+    field(DTYP, "asynInt32")
+    field(OUT,  "@asyn($(PORT),$(ADDR=0),$(TIMEOUT=1))ASI_PX_MODE")
+    field(ZRVL, "0")
+    field(ZRST, "COUNT")
+    field(ONVL, "1")
+    field(ONST, "TOT")
+    field(TWVL, "2")
+    field(TWST, "TOA")
+    field(THVL, "3")
+    field(THST, "TOF")
+}
+
+record(mbbi, "$(P)$(R)PixelMode_RBV")
+{
+    field(DTYP, "asynInt32")
+    field(INP,  "@asyn($(PORT),$(ADDR=0),$(TIMEOUT=1))ASI_PX_MODE")
+    field(ZRVL, "0")
+    field(ZRST, "COUNT")
+    field(ONVL, "1")
+    field(ONST, "TOT")
+    field(TWVL, "2")
+    field(TWST, "TOA")
+    field(THVL, "3")
+    field(THST, "TOF")
+    field(SCAN, "I/O Intr")
+}
+
+record(bo, "$(P)$(R)PreviewEnable")
+{
+    field(PINI, "YES")
+    field(DTYP, "asynInt32")
+    field(OUT,  "@asyn($(PORT),$(ADDR=0),$(TIMEOUT=1))ASI_PREVIEW_ENABLE")
+    field(ZNAM, "No")
+    field(ONAM, "Yes")
+    field(VAL,  "0")
+}
+
+record(bi, "$(P)$(R)PreviewEnable_RBV")
+{
+    field(DTYP, "asynInt32")
+    field(INP,  "@asyn($(PORT),$(ADDR=0),$(TIMEOUT=1))ASI_PREVIEW_ENABLE")
+    field(ZNAM, "No")
+    field(ONAM, "Yes")
+    field(SCAN, "I/O Intr")
+}
+
+########## Disable Redundant areaDetector Fields #########
+
+record(longout, "$(P)$(R)NumExposures")
+{
+    field(DRVL, "1")
+}
+
+record(longout, "$(P)$(R)MinX")
+{
+  field(DISA, "1")
+}
+
+record(longout, "$(P)$(R)MinY")
+{
+  field(DISA, "1")
+}
+
+record(longout, "$(P)$(R)SizeX")
+{
+  field(DISA, "1")
+}
+
+record(longout, "$(P)$(R)SizeY")
+{
+  field(DISA, "1")
+}
+
+record(longout, "$(P)$(R)BinX")
+{
+  field(DISA, "1")
+}
+
+record(longout, "$(P)$(R)BinY")
+{
+  field(DISA, "1")
+}
+
+record(ao, "$(P)$(R)Gain")
+{
+  field(DISA, "1")
+}
+
+record(bo, "$(P)$(R)ReverseX")
+{
+  field(DISA, "1")
+}
+
+record(bo, "$(P)$(R)ReverseY")
+{
+  field(DISA, "1")
+}
+
+
+########## Disable Redundant areaDetector Fields #########
+
+record(longout, "$(P)$(R)NumExposures")
+{
+    field(DRVL, "1")
+}
+
+record(longout, "$(P)$(R)MinX")
+{
+  field(DISA, "1")
+}
+
+record(longout, "$(P)$(R)MinY")
+{
+  field(DISA, "1")
+}
+
+record(longout, "$(P)$(R)SizeX")
+{
+  field(DISA, "1")
+}
+
+record(longout, "$(P)$(R)SizeY")
+{
+  field(DISA, "1")
+}
+
+record(longout, "$(P)$(R)BinX")
+{
+  field(DISA, "1")
+}
+
+record(longout, "$(P)$(R)BinY")
+{
+  field(DISA, "1")
+}
+
+record(ao, "$(P)$(R)Gain")
+{
+  field(DISA, "1")
+}
+
+record(bo, "$(P)$(R)ReverseX")
+{
+  field(DISA, "1")
+}
+
+record(bo, "$(P)$(R)ReverseY")
+{
+  field(DISA, "1")
+}

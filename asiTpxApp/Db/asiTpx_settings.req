@@ -1,0 +1,10 @@
+file "ADBase_settings.req", P=$(P), R=$(R)
+$(P)$(R)TriggerPolarity
+$(P)$(R)RawEnable
+$(P)$(R)RawFilePath
+$(P)$(R)RawFileTemplate
+$(P)$(R)ImageEnable
+$(P)$(R)ImageFilePath
+$(P)$(R)ImageFileTemplate
+$(P)$(R)PixelMode
+$(P)$(R)PreviewEnable

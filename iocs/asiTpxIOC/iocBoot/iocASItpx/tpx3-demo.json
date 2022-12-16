@@ -1,0 +1,12 @@
+{
+    "Server": {
+        "Destination": {
+        }
+    },
+    "Detector": {
+        "Config": {
+            "PixelConfig": "/home/wang_x1/asi_tpx3/asi-server-300-tpx3/examples/tpx3/tpx3-demo.bpc",
+            "DACS": "/home/wang_x1/asi_tpx3/asi-server-300-tpx3/examples/tpx3/tpx3-demo.dacs"
+        }
+    }
+}
