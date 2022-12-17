@@ -554,14 +554,6 @@ asynStatus asiTpx::connectServer()
     setIntegerParam(ADMaxSizeX, info["PixCount"].get<int>() / info["NumberOfRows"].get<int>());
     setIntegerParam(ADMaxSizeY, info["NumberOfRows"].get<int>());
 
-    if (!httpClient.get("/server/destination", response))
-    {
-        asynPrint(this->pasynUserSelf, ASYN_TRACE_ERROR,
-                "%s:%s: /server/destination %s\n",
-                driverName, functionName, response.c_str());
-        return asynError;
-    }
-    
     /* Load pixelConfig and DACS */
     auto config = nlohmann::json::parse(std::ifstream(configFile));
     
@@ -669,16 +661,10 @@ asynStatus asiTpx::startMeasurement()
     }
 
     /* Configure destination */
-    if (!httpClient.get("/server/destination", response))
-    {
-        setStringParam(ADStatusMessage, "Failed to get output destination");
-        asynPrint(this->pasynUserSelf, ASYN_TRACE_ERROR,
-                  "%s:%s /server/destination %s\n",
-                  driverName, functionName, response.c_str());
-        return asynError;
-    }
-    auto destination = nlohmann::json::parse(response);
-    
+    auto destination = nlohmann::json::object();
+    if (httpClient.get("/server/destination", response))
+        destination = nlohmann::json::parse(response);
+
     if (rawEnabled)
     {
         std::string path, pattern;
