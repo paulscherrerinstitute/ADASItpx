@@ -781,8 +781,8 @@ NDArray* asiTpx::readTiffImage(TIFF *tiff)
 {
     const char *functionName = "readTiffImage";
 
-    TIFF_UINT16_T bitsPerSample, sampleFormat, samplePerPixel;
-    TIFF_UINT32_T width, height, numStrips;
+    epicsUInt16 bitsPerSample, sampleFormat, samplePerPixel;
+    epicsUInt32 width, height, numStrips;
 
     if (!tiff)
     {
@@ -857,7 +857,7 @@ NDArray* asiTpx::readTiffImage(TIFF *tiff)
     size_t totalSize = width * height * bitsPerSample / 8;
     NDArray *pArray = this->pNDArrayPool->alloc(2, dims, dataType, totalSize, NULL);
     char *buffer = (char *)pArray->pData;
-    for (TIFF_UINT32_T strip = 0; strip < numStrips; strip++)
+    for (epicsUInt32 strip = 0; strip < numStrips; strip++)
     {
         int size = TIFFReadEncodedStrip(tiff, 0, buffer, totalSize);
         if (size == -1)
