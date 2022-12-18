@@ -58,7 +58,7 @@ static void asiTpxPollTaskC(void *drvPvt);
 class asiTpx : public ADDriver
 {
 public:
-    asiTpx(const char *portName, const char *hostAddress, const char *configFile, int maxBuffers, size_t maxMemory, int priority, int stackSize);
+    asiTpx(const char *portName, const char *configFile, int maxBuffers, size_t maxMemory, int priority, int stackSize);
     virtual ~asiTpx();
     virtual asynStatus writeInt32(asynUser *pasynUser, epicsInt32 value);
     void report(FILE *fp, int details);
@@ -98,8 +98,7 @@ private:
     epicsEventId startEventId;
     epicsEventId stopEventId;
 
-    std::string hostAddress;
-    std::string configFile;
+    nlohmann::json systemConfig;
 
     HTTPClient httpClient;
 };
@@ -113,13 +112,11 @@ asiTpx::~asiTpx()
 }
 
 /* asiTpx constructor */
-asiTpx::asiTpx(const char *portName, const char *hostAddress, const char *configFile, int maxBuffers, size_t maxMemory, int priority, int stackSize)
+asiTpx::asiTpx(const char *portName, const char *configFile, int maxBuffers, size_t maxMemory, int priority, int stackSize)
     : ADDriver(portName, 1, (int)NUM_ASITPX_PARAMS, maxBuffers, maxMemory,
                asynEnumMask | asynFloat64ArrayMask, asynEnumMask | asynFloat64ArrayMask,
                ASYN_CANBLOCK, 1, /* ASYN_CANBLOCK=1, ASYN_MULTIDEVICE=0, autoConnect=1 */
-               priority, stackSize),
-      hostAddress(hostAddress),
-      configFile(configFile)
+               priority, stackSize)
 {
     int status = asynSuccess;
     const char *functionName = "asiTpx";
@@ -148,6 +145,25 @@ asiTpx::asiTpx(const char *portName, const char *hostAddress, const char *config
     setStringParam(NDDriverVersion, DRIVER_VERSION);
     setStringParam(ADManufacturer, "Amsterdam Scientific Instruments");
 
+    /* Read system config file */
+    try
+    {
+        systemConfig = nlohmann::json::parse(std::ifstream(configFile));
+    }
+    catch (...)
+    {
+        asynPrint(this->pasynUserSelf, ASYN_TRACE_ERROR,
+                  "%s:%s: Error in reading system config file %s\n",
+                  driverName, functionName, configFile);
+#if ADCORE_VERSION > 3 || (ADCORE_VERSION == 3 && ADCORE_REVISION >= 10)
+        this->deviceIsReachable = false;
+#endif
+        this->disconnect(pasynUserSelf);
+        setIntegerParam(ADStatus, ADStatusDisconnected);
+        setStringParam(ADStatusMessage, "Error in system config file");
+        return;
+    }
+
     /* Connect serval server */
     if (connectServer())
     {
@@ -160,6 +176,7 @@ asiTpx::asiTpx(const char *portName, const char *hostAddress, const char *config
         this->disconnect(pasynUserSelf);
         setIntegerParam(ADStatus, ADStatusDisconnected);
         setStringParam(ADStatusMessage, "No connection to serval server");
+        return;
     }
 
     /* Signal to the acquistion task to start the acquisition */
@@ -305,7 +322,7 @@ void asiTpx::asiTpxAcquisitionTask()
             getIntegerParam(NDArrayCounter, &imageCounter);
             imageCounter++;
             setIntegerParam(NDArrayCounter, imageCounter);
-            
+
             /* Put the frame number and time stamp into the buffer */
             pImage->uniqueId = imageCounter;
             pImage->timeStamp = startTime.secPastEpoch + startTime.nsec / 1.e9;
@@ -340,7 +357,7 @@ void asiTpx::asiTpxAcquisitionTask()
 
         /* Call the callbacks to update any changes */
         callParamCallbacks();
-    
+
         /* */
         epicsThreadSleep(0.5);
     }
@@ -497,7 +514,7 @@ asynStatus asiTpx::writeInt32(asynUser *pasynUser, epicsInt32 value)
 void asiTpx::report(FILE *fp, int details)
 {
     fprintf(fp, "asiTpx detector %s\n", this->portName);
-    fprintf(fp, "  serval server:      %s\n", this->hostAddress.c_str());
+    fprintf(fp, "  serval address:      %s\n", this->systemConfig["Server"]["Address"].get<std::string>().c_str());
 
     if (details > 0)
     {
@@ -521,8 +538,19 @@ asynStatus asiTpx::connectServer()
     std::string response;
     const char *functionName = "connectServer";
 
-    if (!httpClient.setHost(hostAddress))
+    if (!systemConfig.contains("/Server/Address"_json_pointer)) {
+        asynPrint(this->pasynUserSelf, ASYN_TRACE_ERROR,
+                "%s:%s: Server Address is not configured\n",
+                driverName, functionName);
         return asynError;
+    }
+
+    if (!httpClient.setHost(systemConfig["Server"]["Address"])) {
+        asynPrint(this->pasynUserSelf, ASYN_TRACE_ERROR,
+                "%s:%s: Invalid Server Address '%s'\n",
+                driverName, functionName, systemConfig["Server"]["Address"].get<std::string>().c_str());
+        return asynError;
+    }
 
     /* Parse server and detector info */
     if (!httpClient.get("/dashboard", response))
@@ -555,9 +583,14 @@ asynStatus asiTpx::connectServer()
     setIntegerParam(ADMaxSizeY, info["NumberOfRows"].get<int>());
 
     /* Load pixelConfig and DACS */
-    auto config = nlohmann::json::parse(std::ifstream(configFile));
-    
-    auto dacsFile = config["Detector"]["Config"]["DACS"].get<std::string>();
+    if (!systemConfig.contains("/Detector/Config/DACS"_json_pointer)) {
+        asynPrint(this->pasynUserSelf, ASYN_TRACE_ERROR,
+                "%s:%s: Detector DACS is not set in config file\n",
+                driverName, functionName);
+        return asynError;
+    }
+
+    auto dacsFile = systemConfig["Detector"]["Config"]["DACS"].get<std::string>();
     if(!httpClient.get("/config/load?format=dacs&file=" + dacsFile, response))
     {
         asynPrint(this->pasynUserSelf, ASYN_TRACE_ERROR,
@@ -566,7 +599,13 @@ asynStatus asiTpx::connectServer()
         return asynError;
     }
 
-    auto bpcFile = config["Detector"]["Config"]["PixelConfig"].get<std::string>();
+    if (!systemConfig.contains("/Detector/Config/PixelConfig"_json_pointer)) {
+        asynPrint(this->pasynUserSelf, ASYN_TRACE_ERROR,
+                "%s:%s: Detector PixelConfig is not set in config file\n",
+                driverName, functionName);
+        return asynError;
+    }
+    auto bpcFile = systemConfig["Detector"]["Config"]["PixelConfig"].get<std::string>();
     if(!httpClient.get("/config/load?format=pixelconfig&file=" + bpcFile, response))
     {
         asynPrint(this->pasynUserSelf, ASYN_TRACE_ERROR,
@@ -579,7 +618,7 @@ asynStatus asiTpx::connectServer()
 }
 
 /** Start measurement
- * 
+ *
  */
 asynStatus asiTpx::startMeasurement()
 {
@@ -650,7 +689,7 @@ asynStatus asiTpx::startMeasurement()
         else
             config["TriggerMode"] = "SOFTWARESTART_SOFTWARESTOP";
     }
-    
+
     if (!httpClient.put("/detector/config", config.dump(), response))
     {
         setStringParam(ADStatusMessage, "Failed to configure detector");
@@ -742,7 +781,7 @@ asynStatus asiTpx::startMeasurement()
 }
 
 /** Start measurement
- * 
+ *
  */
 asynStatus asiTpx::stopMeasurement()
 {
@@ -863,11 +902,10 @@ NDArray* asiTpx::readTiffImage(TIFF *tiff)
 }
 
 /** Configuration command, called directly or from iocsh */
-extern "C" int asiTpxConfig(const char *portName,
-                            const char *hostAddress, const char *configFile,
+extern "C" int asiTpxConfig(const char *portName, const char *configFile,
                             int maxBuffers, int maxMemory, int priority, int stackSize)
 {
-    new asiTpx(portName, hostAddress, configFile,
+    new asiTpx(portName, configFile,
                (maxBuffers < 0) ? 0 : maxBuffers,
                (maxMemory < 0) ? 0 : maxMemory,
                priority, stackSize);
@@ -876,24 +914,22 @@ extern "C" int asiTpxConfig(const char *portName,
 
 /** Code for iocsh registration */
 static const iocshArg asiTpxConfigArg0 = {"Port name", iocshArgString};
-static const iocshArg asiTpxConfigArg1 = {"Server address", iocshArgString};
-static const iocshArg asiTpxConfigArg2 = {"Config file", iocshArgString};
-static const iocshArg asiTpxConfigArg3 = {"maxBuffers", iocshArgInt};
-static const iocshArg asiTpxConfigArg4 = {"maxMemory", iocshArgInt};
-static const iocshArg asiTpxConfigArg5 = {"priority", iocshArgInt};
-static const iocshArg asiTpxConfigArg6 = {"stackSize", iocshArgInt};
+static const iocshArg asiTpxConfigArg1 = {"Config file", iocshArgString};
+static const iocshArg asiTpxConfigArg2 = {"maxBuffers", iocshArgInt};
+static const iocshArg asiTpxConfigArg3 = {"maxMemory", iocshArgInt};
+static const iocshArg asiTpxConfigArg4 = {"priority", iocshArgInt};
+static const iocshArg asiTpxConfigArg5 = {"stackSize", iocshArgInt};
 static const iocshArg *const asiTpxConfigArgs[] = {&asiTpxConfigArg0,
                                                    &asiTpxConfigArg1,
                                                    &asiTpxConfigArg2,
                                                    &asiTpxConfigArg3,
                                                    &asiTpxConfigArg4,
-                                                   &asiTpxConfigArg5,
-                                                   &asiTpxConfigArg6};
+                                                   &asiTpxConfigArg5};
 static const iocshFuncDef configasiTpx = {"asiTpxConfig", 6, asiTpxConfigArgs};
 static void configasiTpxCallFunc(const iocshArgBuf *args)
 {
-    asiTpxConfig(args[0].sval, args[1].sval, args[2].sval,
-                 args[3].ival, args[4].ival, args[5].ival, args[6].ival);
+    asiTpxConfig(args[0].sval, args[1].sval,
+                 args[2].ival, args[3].ival, args[4].ival, args[5].ival);
 }
 
 static void asiTpxRegister(void)

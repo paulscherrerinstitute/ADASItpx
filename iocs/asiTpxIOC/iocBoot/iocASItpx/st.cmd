@@ -39,9 +39,9 @@ asynSetMinTimerPeriod(0.001)
 #epicsEnvSet("EPICS_CA_MAX_ARRAY_BYTES", "10000000")
 
 # Create a ASItpx driver
-# asiTpxAnalyserConfig(const char *portName, const char *hostAddress, const char *configFile,
+# asiTpxAnalyserConfig(const char *portName, const char *configFile,
 #                   int maxBuffers, int maxMemory, int priority, int stackSize)
-asiTpxConfig("$(PORT)", "http://127.0.0.1:8080", "tpx3-demo.json",  0, 0)
+asiTpxConfig("$(PORT)", "tpx3-demo.json",  0, 0)
 
 dbLoadRecords("$(ASITPX)/db/asiTpx.template","P=$(PREFIX),R=cam1:,PORT=$(PORT),ADDR=0,TIMEOUT=1")
 
