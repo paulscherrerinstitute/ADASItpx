@@ -4,20 +4,16 @@
 include "ADBase.template"
 
 # No Continuous mode
-record(mbbo, "$(P)$(R)TriggerMode")
+record(mbbo, "$(P)$(R)ImageMode")
 {
-    field(ZRVL, "0")
-    field(ZRST, "Single")
-    field(ONVL, "1")
-    field(ONST, "Multiple")
+    field(TWVL, "0")
+    field(TWST, "")
 }
 
-record(mbbi, "$(P)$(R)TriggerMode_RBV")
+record(mbbi, "$(P)$(R)ImageMode_RBV")
 {
-    field(ZRVL, "0")
-    field(ZRST, "Single")
-    field(ONVL, "1")
-    field(ONST, "Multiple")
+    field(TWVL, "0")
+    field(TWST, "")
 }
 
 ########## Trigger Settings #########
