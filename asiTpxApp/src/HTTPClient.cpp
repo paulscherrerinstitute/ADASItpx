@@ -319,8 +319,10 @@ bool HTTPClient::setHost (const std::string& uri)
 
 void HTTPClient::close (socket_t *s)
 {
-    if (s->fd != INVALID_SOCKET)
+    if (s->fd != INVALID_SOCKET) {
         epicsSocketDestroy(s->fd);
+        s->fd = INVALID_SOCKET;
+    }
     s->closed = true;
 }
 
