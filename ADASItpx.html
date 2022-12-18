@@ -1,0 +1,298 @@
+<!DOCTYPE html>
+
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="generator" content="Docutils 0.19: https://docutils.sourceforge.io/" />
+
+    <title>ASI TPX driver &#8212; ADASItpx 1cd0830 documentation</title>
+    <link rel="stylesheet" type="text/css" href="_static/pygments.css" />
+    <link rel="stylesheet" type="text/css" href="_static/bootstrap-sphinx.css" />
+    <script data-url_root="./" id="documentation_options" src="_static/documentation_options.js"></script>
+    <script src="_static/jquery.js"></script>
+    <script src="_static/underscore.js"></script>
+    <script src="_static/_sphinx_javascript_frameworks_compat.js"></script>
+    <script src="_static/doctools.js"></script>
+    <script src="_static/sphinx_highlight.js"></script>
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+<meta charset='utf-8'>
+<meta http-equiv='X-UA-Compatible' content='IE=edge,chrome=1'>
+<meta name='viewport' content='width=device-width, initial-scale=1.0, maximum-scale=1'>
+<meta name="apple-mobile-web-app-capable" content="yes">
+<script type="text/javascript" src="_static/js/jquery-1.12.4.min.js"></script>
+<script type="text/javascript" src="_static/js/jquery-fix.js"></script>
+<script type="text/javascript" src="_static/bootstrap-3.4.1/js/bootstrap.min.js"></script>
+<script type="text/javascript" src="_static/bootstrap-sphinx.js"></script>
+
+  </head><body>
+
+  <div id="navbar" class="navbar navbar-default navbar-fixed-top">
+    <div class="container">
+      <div class="navbar-header">
+        <!-- .btn-navbar is used as the toggle for collapsed navbar content -->
+        <button type="button" class="navbar-toggle" data-toggle="collapse" data-target=".nav-collapse">
+          <span class="icon-bar"></span>
+          <span class="icon-bar"></span>
+          <span class="icon-bar"></span>
+        </button>
+        <a class="navbar-brand" href="#">
+          ADASItpx</a>
+        <span class="navbar-text navbar-version pull-left"><b>1cd0830</b></span>
+      </div>
+
+        <div class="collapse navbar-collapse nav-collapse">
+          <ul class="nav navbar-nav">
+            
+            
+              <li class="dropdown globaltoc-container">
+  <a role="button"
+     id="dLabelGlobalToc"
+     data-toggle="dropdown"
+     data-target="#"
+     href="#">Site <b class="caret"></b></a>
+  <ul class="dropdown-menu globaltoc"
+      role="menu"
+      aria-labelledby="dLabelGlobalToc"></ul>
+</li>
+              
+                <li class="dropdown">
+  <a role="button"
+     id="dLabelLocalToc"
+     data-toggle="dropdown"
+     data-target="#"
+     href="#">Page <b class="caret"></b></a>
+  <ul class="dropdown-menu localtoc"
+      role="menu"
+      aria-labelledby="dLabelLocalToc"><ul>
+<li><a class="reference internal" href="#">ASI TPX driver</a><ul>
+<li><a class="reference internal" href="#introduction">Introduction</a></li>
+<li><a class="reference internal" href="#adasitpx-specific-parameters">ADASItpx specific parameters</a><ul>
+<li><a class="reference internal" href="#data-output-settings">Data output settings</a></li>
+<li><a class="reference internal" href="#trigger-settings">Trigger settings</a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+</ul>
+</li>
+              
+            
+            
+              
+                
+              
+            
+            
+            
+            
+              <li class="hidden-sm">
+<div id="sourcelink">
+  <a href="_sources/ADASItpx.rst.txt"
+     rel="nofollow">Source</a>
+</div></li>
+            
+          </ul>
+
+          
+            
+<form class="navbar-form navbar-right" action="search.html" method="get">
+ <div class="form-group">
+  <input type="text" name="q" class="form-control" placeholder="Search" />
+ </div>
+  <input type="hidden" name="check_keywords" value="yes" />
+  <input type="hidden" name="area" value="default" />
+</form>
+          
+        </div>
+    </div>
+  </div>
+
+<div class="container">
+  <div class="row">
+    <div class="body col-md-12 content" role="main">
+      
+  <section id="asi-tpx-driver">
+<h1>ASI TPX driver<a class="headerlink" href="#asi-tpx-driver" title="Permalink to this heading">¶</a></h1>
+<dl class="field-list simple">
+<dt class="field-odd">author<span class="colon">:</span></dt>
+<dd class="field-odd"><p>Xiaoqiang Wang</p>
+</dd>
+</dl>
+<section id="introduction">
+<h2>Introduction<a class="headerlink" href="#introduction" title="Permalink to this heading">¶</a></h2>
+<p>This is an <a class="reference external" href="https://epics-controls.org">EPICS</a> <a class="reference external" href="https://areadetector.github.io/master/index.html">areaDetector</a> driver for <a class="reference external" href="https://www.amscins.com">Amsterdam Scientific Instruments</a> hybrid pixel detectors
+using the Serval HTTP API.</p>
+</section>
+<section id="adasitpx-specific-parameters">
+<h2>ADASItpx specific parameters<a class="headerlink" href="#adasitpx-specific-parameters" title="Permalink to this heading">¶</a></h2>
+<p>The ADASItpx driver implements the following parameters in addition
+to those in <a class="reference external" href="https://areadetector.github.io/master/ADCore/ADDriver.html">ADDriver</a>. The records are in asiTpx.template.</p>
+<section id="data-output-settings">
+<h3>Data output settings<a class="headerlink" href="#data-output-settings" title="Permalink to this heading">¶</a></h3>
+<p>The server supports three output channels,</p>
+<ul class="simple">
+<li><p>Raw - Unprocessed data straight from the detector in tpx3 format.</p></li>
+<li><p>Image - Two-dimensional images at detector acquisition framerate in TIFF format.</p></li>
+<li><p>Preview - Two-dimensional images at preview framerate.</p></li>
+</ul>
+<p>The output file path of each channel can be one of the following:</p>
+<ul class="simple">
+<li><p>A physical file path on the server host, e.g. “/tmp”.</p></li>
+<li><p>An HTTP host URL, e.g. “http://localhost:8080”. In such a case the image is accessible via URL “http://localhost:8080/measurement/image”.</p></li>
+<li><p>A TCP address,</p>
+<ul>
+<li><p>“<a class="reference external" href="tcp://listen&#64;localhost:1234">tcp://listen&#64;localhost:1234</a>”. Server opens a socket at the specified port at the start of a measurement.
+The client can connect to this TCP address and start listening for data.</p></li>
+<li><p>“<a class="reference external" href="tcp://connect&#64;localhost:1234">tcp://connect&#64;localhost:1234</a>”. The client opens a TCP socket at the specified address and port.
+On starting the measurement the server will connect to the client socket.</p></li>
+</ul>
+</li>
+</ul>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>In this driver, the preview image output is fixed to the server host URL. The driver polls this URL and read into NDArrays.</p>
+</div>
+<table class="table-bordered table-striped table-hover docutils align-default">
+<colgroup>
+<col style="width: 20.0%" />
+<col style="width: 10.0%" />
+<col style="width: 70.0%" />
+</colgroup>
+<thead>
+<tr class="row-odd"><th class="head"><p>EPICS record name</p></th>
+<th class="head"><p>EPICS record type</p></th>
+<th class="head"><p>Description</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p>$(P)$(R)RawEnable, $(P)$(R)RawEnable_RBV</p></td>
+<td><p>mbbo, mbbi</p></td>
+<td><p>Enable raw data output</p></td>
+</tr>
+<tr class="row-odd"><td><p>$(P)$(R)RawFilePath, $(P)$(R)RawFilePath_RBV</p></td>
+<td><p>waveform</p></td>
+<td><p>raw data output path</p></td>
+</tr>
+<tr class="row-even"><td><p>$(P)$(R)RawFileTemplate, $(P)$(R)RawFileTemplate_RBV</p></td>
+<td><p>waveform</p></td>
+<td><p>raw data output file name prefix</p></td>
+</tr>
+<tr class="row-odd"><td><p>$(P)$(R)ImageEnable, $(P)$(R)ImageEnable_RBV</p></td>
+<td><p>mbbo, mbbi</p></td>
+<td><p>Enable image output</p></td>
+</tr>
+<tr class="row-even"><td><p>$(P)$(R)PixelMode, $(P)$(R)PixelMode_RBV</p></td>
+<td><p>mbbo, mbbi</p></td>
+<td><p>Pixel mode for image output</p></td>
+</tr>
+<tr class="row-odd"><td><p>$(P)$(R)ImageFilePath, $(P)$(R)ImageFilePath_RBV</p></td>
+<td><p>waveform</p></td>
+<td><p>image output path</p></td>
+</tr>
+<tr class="row-even"><td><p>$(P)$(R)ImageFileTemplate, $(P)$(R)ImageFileTemplate_RBV</p></td>
+<td><p>waveform</p></td>
+<td><p>image output file name prefix</p></td>
+</tr>
+<tr class="row-odd"><td><p>$(P)$(R)PreviewEnable, $(P)$(R)PreviewEnable_RBV</p></td>
+<td><p>mbbo, mbbi</p></td>
+<td><p>Enable preview image output.</p></td>
+</tr>
+</tbody>
+</table>
+</section>
+<section id="trigger-settings">
+<h3>Trigger settings<a class="headerlink" href="#trigger-settings" title="Permalink to this heading">¶</a></h3>
+<p>The detector supports 8 trigger modes, which are configured by a combination of 3 EPICS records.</p>
+<table class="table-bordered table-striped table-hover docutils align-default">
+<colgroup>
+<col style="width: 20.0%" />
+<col style="width: 10.0%" />
+<col style="width: 10.0%" />
+<col style="width: 10.0%" />
+<col style="width: 50.0%" />
+</colgroup>
+<thead>
+<tr class="row-odd"><th class="head"><p>Native TriggerMode</p></th>
+<th class="head"><p>$(P)$(R)TriggerMode</p></th>
+<th class="head"><p>$(P)$(R)ExposureMode</p></th>
+<th class="head"><p>$(P)$(R)TriggerPolarity</p></th>
+<th class="head"><p>Description</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p>PEXSTART_NEXSTOP</p></td>
+<td><p>External</p></td>
+<td><p>Gated</p></td>
+<td><p>Positive</p></td>
+<td><p>Acq. is started by positive edge external trigger input, stopped by negative edge</p></td>
+</tr>
+<tr class="row-odd"><td><p>NEXSTART_PEXSTOP</p></td>
+<td><p>External</p></td>
+<td><p>Gated</p></td>
+<td><p>Negative</p></td>
+<td><p>Acq. is started by negative edge external trigger input, stopped by positive edge</p></td>
+</tr>
+<tr class="row-even"><td><p>PEXSTART_TIMERSTOP</p></td>
+<td><p>External</p></td>
+<td><p>Timed</p></td>
+<td><p>Positive</p></td>
+<td><p>Acq. is started by positive edge external trigger input, stopped by HW timer</p></td>
+</tr>
+<tr class="row-odd"><td><p>NEXSTART_TIMERSTOP</p></td>
+<td><p>External</p></td>
+<td><p>Timed</p></td>
+<td><p>Negative</p></td>
+<td><p>Acq. is started by negative edge external trigger input, stopped by HW timer</p></td>
+</tr>
+<tr class="row-even"><td><p>AUTOTRIGSTART_TIMERSTOP</p></td>
+<td><p>Internal</p></td>
+<td><p>Timed</p></td>
+<td><p>-</p></td>
+<td><p>Acq. is started by trigger from HW, stopped by HW timer</p></td>
+</tr>
+<tr class="row-odd"><td><p>CONTINUOUS</p></td>
+<td><p>Internal</p></td>
+<td><p>Gated</p></td>
+<td><p>-</p></td>
+<td><p>Acq. is started by software, stopped by software</p></td>
+</tr>
+<tr class="row-even"><td><p>AUTOTRIGSTART_TIMERSTOP</p></td>
+<td><p>Software</p></td>
+<td><p>Timed</p></td>
+<td><p>-</p></td>
+<td><p>Acq. is started by writting 1 to $(P)$(R)TriggerSoftware, stopped by HW timer</p></td>
+</tr>
+<tr class="row-odd"><td><p>SOFTWARESTART_SOFTWARESTOP</p></td>
+<td><p>Software</p></td>
+<td><p>Gated</p></td>
+<td><p>-</p></td>
+<td><p>Acq. is started by writting 1 to $(P)$(R)TriggerSoftware, stopped by writting 0
+to $(P)$(R)TriggerSoftware</p></td>
+</tr>
+</tbody>
+</table>
+</section>
+</section>
+</section>
+
+
+    </div>
+      
+  </div>
+</div>
+<footer class="footer">
+  <div class="container">
+    <p class="pull-right">
+      <a href="#">Back to top</a>
+      
+    </p>
+    <p>
+        &copy; Copyright 2022, Xiaoqiang Wang.<br/>
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 5.3.0.<br/>
+    </p>
+  </div>
+</footer>
+  </body>
+</html>
