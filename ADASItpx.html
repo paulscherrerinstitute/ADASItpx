@@ -5,7 +5,7 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="generator" content="Docutils 0.19: https://docutils.sourceforge.io/" />
 
-    <title>ASI TPX driver &#8212; ADASItpx 1cd0830 documentation</title>
+    <title>ASI TPX driver &#8212; ADASItpx b792a3b documentation</title>
     <link rel="stylesheet" type="text/css" href="_static/pygments.css" />
     <link rel="stylesheet" type="text/css" href="_static/bootstrap-sphinx.css" />
     <script data-url_root="./" id="documentation_options" src="_static/documentation_options.js"></script>
@@ -38,7 +38,7 @@
         </button>
         <a class="navbar-brand" href="#">
           ADASItpx</a>
-        <span class="navbar-text navbar-version pull-left"><b>1cd0830</b></span>
+        <span class="navbar-text navbar-version pull-left"><b>b792a3b</b></span>
       </div>
 
         <div class="collapse navbar-collapse nav-collapse">
@@ -72,6 +72,7 @@
 <li><a class="reference internal" href="#trigger-settings">Trigger settings</a></li>
 </ul>
 </li>
+<li><a class="reference internal" href="#configuration">Configuration</a></li>
 </ul>
 </li>
 </ul>
@@ -274,6 +275,28 @@ to $(P)$(R)TriggerSoftware</p></td>
 </tbody>
 </table>
 </section>
+</section>
+<section id="configuration">
+<h2>Configuration<a class="headerlink" href="#configuration" title="Permalink to this heading">¶</a></h2>
+<p>The command to configure an ADVimba camera in the startup script is:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">asiTpxConfig</span><span class="p">(</span><span class="n">const</span> <span class="n">char</span> <span class="o">*</span><span class="n">portName</span><span class="p">,</span> <span class="n">const</span> <span class="n">char</span> <span class="o">*</span><span class="n">configFile</span><span class="p">,</span>
+                 <span class="nb">int</span> <span class="n">maxBuffers</span><span class="p">,</span> <span class="nb">int</span> <span class="n">maxMemory</span><span class="p">,</span> <span class="nb">int</span> <span class="n">priority</span><span class="p">,</span> <span class="nb">int</span> <span class="n">stackSize</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>The <em>configFile</em> is a json file, which specifies the server address and detector DACS and BPC file path, e.g.</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="p">{</span>
+    <span class="s2">&quot;Server&quot;</span><span class="p">:</span> <span class="p">{</span>
+        <span class="s2">&quot;Address&quot;</span><span class="p">:</span> <span class="s2">&quot;http://localhost:8080&quot;</span>
+    <span class="p">},</span>
+    <span class="s2">&quot;Detector&quot;</span><span class="p">:</span> <span class="p">{</span>
+        <span class="s2">&quot;Config&quot;</span><span class="p">:</span> <span class="p">{</span>
+            <span class="s2">&quot;PixelConfig&quot;</span><span class="p">:</span> <span class="s2">&quot;/home/scratch/asi_tpx3/asi-server-300-tpx3/examples/tpx3/tpx3-demo.bpc&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;DACS&quot;</span><span class="p">:</span> <span class="s2">&quot;/home/scratch/asi_tpx3/asi-server-300-tpx3/examples/tpx3/tpx3-demo.dacs&quot;</span>
+        <span class="p">}</span>
+    <span class="p">}</span>
+<span class="p">}</span>
+</pre></div>
+</div>
 </section>
 </section>
 
