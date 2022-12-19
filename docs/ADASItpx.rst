@@ -144,3 +144,27 @@ The detector supports 8 trigger modes, which are configured by a combination of 
     - Acq. is started by writting 1 to $(P)$(R)TriggerSoftware, stopped by writting 0
       to $(P)$(R)TriggerSoftware
 
+
+Configuration
+-------------
+
+The command to configure an ADVimba camera in the startup script is:
+::
+
+  asiTpxConfig(const char *portName, const char *configFile,
+                   int maxBuffers, int maxMemory, int priority, int stackSize)
+
+The *configFile* is a json file, which specifies the server address and detector DACS and BPC file path, e.g. ::
+
+  {
+      "Server": {
+          "Address": "http://localhost:8080"
+      },
+      "Detector": {
+          "Config": {
+              "PixelConfig": "/home/scratch/asi_tpx3/asi-server-300-tpx3/examples/tpx3/tpx3-demo.bpc",
+              "DACS": "/home/scratch/asi_tpx3/asi-server-300-tpx3/examples/tpx3/tpx3-demo.dacs"
+          }
+      }
+  }
+
