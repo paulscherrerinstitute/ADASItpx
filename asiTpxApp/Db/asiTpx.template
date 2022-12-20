@@ -403,6 +403,13 @@ record(ai, "$(P)$(R)PreviewPeriod_RBV")
     field(SCAN, "I/O Intr")
 }
 
+record(longin, "$(P)$(R)DroppedFrames_RBV")
+{
+    field(DTYP, "asynInt32")
+    field(INP,  "@asyn($(PORT),$(ADDR=0),$(TIMEOUT=1))ASI_DROPPED_FRAMES")
+    field(SCAN, "I/O Intr")
+}
+
 ########## Disable Redundant areaDetector Fields #########
 
 record(longout, "$(P)$(R)NumExposures")

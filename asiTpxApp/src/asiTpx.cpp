@@ -44,6 +44,7 @@
 #define ASIPixelModeString          "ASI_PX_MODE"
 #define ASIPreviewEnableString      "ASI_PREVIEW_ENABLE"
 #define ASIPreviewPeriodString      "ASI_PREVIEW_PERIOD"
+#define ASIDroppedFramesString      "ASI_DROPPED_FRAMES"
 #define ASILocalTemperatureString   "ASI_TEMP_LOC"
 #define ASIFPGATemperatureString    "ASI_TEMP_FPGA"
 #define ASIChipsTemperatureString   "ASI_TEMP_CHIPS"
@@ -89,6 +90,7 @@ protected:
     int ASIPixelMode;
     int ASIPreviewEnable;
     int ASIPreviewPeriod;
+    int ASIDroppedFrames;
     int ASILocalTemperature;
     int ASIFPGATemperature;
     int ASIChipsTemperature;
@@ -138,6 +140,7 @@ asiTpx::asiTpx(const char *portName, const char *configFile, int maxBuffers, siz
     createParam(ASIPixelModeString,         asynParamInt32, &ASIPixelMode);
     createParam(ASIPreviewEnableString,     asynParamInt32, &ASIPreviewEnable);
     createParam(ASIPreviewPeriodString,     asynParamFloat64, &ASIPreviewPeriod);
+    createParam(ASIDroppedFramesString,     asynParamInt32, &ASIDroppedFrames);
     createParam(ASILocalTemperatureString, asynParamFloat64, &ASILocalTemperature);
     createParam(ASIFPGATemperatureString,  asynParamFloat64, &ASIFPGATemperature);
     createParam(ASIChipsTemperatureString, asynParamOctet, &ASIChipsTemperature);
@@ -243,7 +246,9 @@ void asiTpx::asiTpxAcquisitionTask()
     int arrayCallbacks;
     int imageCounter = 0, numImagesCounter = 0;
     double acquirePeriod, previewPeriod;
+    double timeRemaining;
     int previewEnabled;
+    int droppedFrames;
     epicsTimeStamp startTime, endTime;
     std::string statusMessage;
     std::string response;
@@ -318,11 +323,15 @@ void asiTpx::asiTpxAcquisitionTask()
         {
             auto dashboard = nlohmann::json::parse(response);
             numImagesCounter = dashboard["Measurement"]["FrameCount"];
+            timeRemaining = dashboard["Measurement"]["TimeLeft"];
+            droppedFrames = dashboard["Measurement"]["DroppedFrames"];
             if (dashboard["Measurement"]["Status"] == "DA_IDLE")
                 acquire = 0;
         }
         this->lock();
 
+        setDoubleParam(ADTimeRemaining, timeRemaining);
+        setIntegerParam(ASIDroppedFrames, droppedFrames);
         setIntegerParam(ADNumImagesCounter, numImagesCounter);
 
         if (pImage)
@@ -372,7 +381,6 @@ void asiTpx::asiTpxAcquisitionTask()
         epicsTimeGetCurrent(&endTime);
         double elapsedTime = epicsTimeDiffInSeconds(&endTime, &startTime);
         double delay = std::max(acquirePeriod, previewPeriod) - elapsedTime;
-        printf("elapsed %f delay %f\n", elapsedTime, delay);
         if (delay > 0.0)
             epicsThreadSleep(delay);
     }
