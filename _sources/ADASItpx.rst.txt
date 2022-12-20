@@ -168,3 +168,9 @@ The *configFile* is a json file, which specifies the server address and detector
       }
   }
 
+
+MEDM screen
+-----------
+
+.. figure:: _static/ADASItpx.png
+    :align: center
