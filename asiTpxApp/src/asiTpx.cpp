@@ -71,7 +71,7 @@ protected:
     asynStatus startMeasurement();
     asynStatus stopMeasurement();
 
-    NDArray* readTiffImage(TIFF *tiff);
+    NDArray *readTiffImage(TIFF *tiff);
 
     int ASIExposureMode;
 #define FIRST_ASITPX_PARAM ASIExposureMode
@@ -243,6 +243,7 @@ void asiTpx::asiTpxAcquisitionTask()
     int arrayCallbacks;
     int imageCounter = 0, numImagesCounter = 0;
     double acquirePeriod, previewPeriod;
+    int previewEnabled;
     epicsTimeStamp startTime, endTime;
     std::string statusMessage;
     std::string response;
@@ -297,6 +298,7 @@ void asiTpx::asiTpxAcquisitionTask()
         }
         epicsTimeGetCurrent(&startTime);
 
+        getIntegerParam(ASIPreviewEnable, &previewEnabled);
         getDoubleParam(ADAcquirePeriod, &acquirePeriod);
         getDoubleParam(ASIPreviewPeriod, &previewPeriod);
         getIntegerParam(NDArrayCallbacks, &arrayCallbacks);
@@ -304,7 +306,7 @@ void asiTpx::asiTpxAcquisitionTask()
         this->unlock();
 
         /* Preview image */
-        if (arrayCallbacks && httpClient.get("/measurement/image", response))
+        if (previewEnabled && httpClient.get("/measurement/image", response))
         {
             std::istringstream stream(response);
             TIFF *tiff = TIFFStreamOpen("memfile", &stream);
@@ -337,15 +339,17 @@ void asiTpx::asiTpxAcquisitionTask()
             /* Get any attributes that have been defined for this driver */
             this->getAttributes(pImage->pAttributeList);
 
-            /* Must release the lock here, or we can get into a deadlock, because we can
-             * block on the plugin lock, and the plugin can be calling us */
-            this->unlock();
-            asynPrint(this->pasynUserSelf, ASYN_TRACE_FLOW,
-                    "%s:%s: Calling NDArray callback\n",
-                    driverName, functionName);
-            doCallbacksGenericPointer(pImage, NDArrayData, 0);
-            this->lock();
-
+            if (arrayCallbacks)
+            {
+               /* Must release the lock here, or we can get into a deadlock, because we can
+                * block on the plugin lock, and the plugin can be calling us */
+                this->unlock();
+                asynPrint(this->pasynUserSelf, ASYN_TRACE_FLOW,
+                          "%s:%s: Calling NDArray callback\n",
+                          driverName, functionName);
+                doCallbacksGenericPointer(pImage, NDArrayData, 0);
+                this->lock();
+            }
             /* Free the image buffer */
             pImage->release();
             pImage = NULL;
@@ -549,17 +553,19 @@ asynStatus asiTpx::connectServer()
     std::string response;
     const char *functionName = "connectServer";
 
-    if (!systemConfig.contains("/Server/Address"_json_pointer)) {
+    if (!systemConfig.contains("/Server/Address"_json_pointer))
+    {
         asynPrint(this->pasynUserSelf, ASYN_TRACE_ERROR,
-                "%s:%s: Server Address is not configured\n",
-                driverName, functionName);
+                  "%s:%s: Server Address is not configured\n",
+                  driverName, functionName);
         return asynError;
     }
 
-    if (!httpClient.setHost(systemConfig["Server"]["Address"])) {
+    if (!httpClient.setHost(systemConfig["Server"]["Address"]))
+    {
         asynPrint(this->pasynUserSelf, ASYN_TRACE_ERROR,
-                "%s:%s: Invalid Server Address '%s'\n",
-                driverName, functionName, systemConfig["Server"]["Address"].get<std::string>().c_str());
+                  "%s:%s: Invalid Server Address '%s'\n",
+                  driverName, functionName, systemConfig["Server"]["Address"].get<std::string>().c_str());
         return asynError;
     }
 
@@ -567,8 +573,8 @@ asynStatus asiTpx::connectServer()
     if (!httpClient.get("/dashboard", response))
     {
         asynPrint(this->pasynUserSelf, ASYN_TRACE_ERROR,
-                "%s:%s: /dashboard %s\n",
-                driverName, functionName, response.c_str());
+                  "%s:%s: /dashboard %s\n",
+                  driverName, functionName, response.c_str());
         return asynError;
     }
 
@@ -582,8 +588,8 @@ asynStatus asiTpx::connectServer()
     if (!httpClient.get("/detector/info", response))
     {
         asynPrint(this->pasynUserSelf, ASYN_TRACE_ERROR,
-                "%s:%s: /detector/info %s\n",
-                driverName, functionName, response.c_str());
+                  "%s:%s: /detector/info %s\n",
+                  driverName, functionName, response.c_str());
         return asynError;
     }
 
@@ -594,34 +600,36 @@ asynStatus asiTpx::connectServer()
     setIntegerParam(ADMaxSizeY, info["NumberOfRows"].get<int>());
 
     /* Load pixelConfig and DACS */
-    if (!systemConfig.contains("/Detector/Config/DACS"_json_pointer)) {
+    if (!systemConfig.contains("/Detector/Config/DACS"_json_pointer))
+    {
         asynPrint(this->pasynUserSelf, ASYN_TRACE_ERROR,
-                "%s:%s: Detector DACS is not set in config file\n",
-                driverName, functionName);
+                  "%s:%s: Detector DACS is not set in config file\n",
+                  driverName, functionName);
         return asynError;
     }
 
     auto dacsFile = systemConfig["Detector"]["Config"]["DACS"].get<std::string>();
-    if(!httpClient.get("/config/load?format=dacs&file=" + dacsFile, response))
+    if (!httpClient.get("/config/load?format=dacs&file=" + dacsFile, response))
     {
         asynPrint(this->pasynUserSelf, ASYN_TRACE_ERROR,
-                "%s:%s: Failed to load DACS file '%s'. %s\n",
-                driverName, functionName, dacsFile.c_str(), response.c_str());
+                  "%s:%s: Failed to load DACS file '%s'. %s\n",
+                  driverName, functionName, dacsFile.c_str(), response.c_str());
         return asynError;
     }
 
-    if (!systemConfig.contains("/Detector/Config/PixelConfig"_json_pointer)) {
+    if (!systemConfig.contains("/Detector/Config/PixelConfig"_json_pointer))
+    {
         asynPrint(this->pasynUserSelf, ASYN_TRACE_ERROR,
-                "%s:%s: Detector PixelConfig is not set in config file\n",
-                driverName, functionName);
+                  "%s:%s: Detector PixelConfig is not set in config file\n",
+                  driverName, functionName);
         return asynError;
     }
     auto bpcFile = systemConfig["Detector"]["Config"]["PixelConfig"].get<std::string>();
-    if(!httpClient.get("/config/load?format=pixelconfig&file=" + bpcFile, response))
+    if (!httpClient.get("/config/load?format=pixelconfig&file=" + bpcFile, response))
     {
         asynPrint(this->pasynUserSelf, ASYN_TRACE_ERROR,
-                "%s:%s: Failed to load PixelConfig file '%s'. %s\n",
-                driverName, functionName, bpcFile.c_str(), response.c_str());
+                  "%s:%s: Failed to load PixelConfig file '%s'. %s\n",
+                  driverName, functionName, bpcFile.c_str(), response.c_str());
         return asynError;
     }
 
@@ -760,18 +768,16 @@ asynStatus asiTpx::startMeasurement()
         getIntegerParam(ASIPixelMode, &mode);
         destination["Preview"]["Period"] = std::max(acquirePeriod, previewPeriod);
         destination["Preview"]["SamplingMode"] = "skipOnFrame";
-        destination["Preview"]["ImageChannels"][0] = nlohmann::json({
-            {"Base", "http://localhost"},
-            {"Format", "tiff"},
-            {"Mode", PIXEL_MODE[mode]}
-        });
+        destination["Preview"]["ImageChannels"][0] = nlohmann::json({{"Base", "http://localhost"},
+                                                                     {"Format", "tiff"},
+                                                                     {"Mode", PIXEL_MODE[mode]}});
     }
     else
     {
         destination["Preview"] = nlohmann::json();
     }
 
-    if(!httpClient.put("/server/destination", destination.dump(), response))
+    if (!httpClient.put("/server/destination", destination.dump(), response))
     {
         setStringParam(ADStatusMessage, "Failed to set output destination");
         asynPrint(this->pasynUserSelf, ASYN_TRACE_ERROR,
@@ -815,7 +821,7 @@ asynStatus asiTpx::stopMeasurement()
 
 /** Read tiff image
  */
-NDArray* asiTpx::readTiffImage(TIFF *tiff)
+NDArray *asiTpx::readTiffImage(TIFF *tiff)
 {
     const char *functionName = "readTiffImage";
 
@@ -851,35 +857,36 @@ NDArray* asiTpx::readTiffImage(TIFF *tiff)
     {
     case 8:
         dataType = (sampleFormat == 1) ? NDUInt8 : NDInt8;
-    break;
+        break;
     case 16:
         dataType = (sampleFormat == 1) ? NDUInt16 : NDInt16;
-    break;
+        break;
     case 32:
     {
-        switch (sampleFormat) {
+        switch (sampleFormat)
+        {
         case 1:
             dataType = NDUInt32;
-        break;
+            break;
         case 2:
             dataType = NDInt32;
-        break;
+            break;
         default:
             dataType = NDFloat32;
-        break;
+            break;
         }
     }
     break;
     case 64:
     {
-        switch(sampleFormat)
+        switch (sampleFormat)
         {
         case 1:
             dataType = NDUInt64;
-        break;
+            break;
         case 2:
             dataType = NDInt64;
-        break;
+            break;
         default:
             dataType = NDFloat64;
         }
@@ -903,8 +910,8 @@ NDArray* asiTpx::readTiffImage(TIFF *tiff)
             pArray->release();
             pArray = NULL;
             asynPrint(this->pasynUserSelf, ASYN_TRACE_ERROR,
-                  "%s:%s: TIFFReadEncodeStrip failed\n",
-                  driverName, functionName);
+                      "%s:%s: TIFFReadEncodeStrip failed\n",
+                      driverName, functionName);
             break;
         }
         buffer += size;
