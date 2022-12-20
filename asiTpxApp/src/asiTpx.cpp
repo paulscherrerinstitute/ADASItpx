@@ -776,7 +776,7 @@ asynStatus asiTpx::startMeasurement()
         getIntegerParam(ASIPixelMode, &mode);
         destination["Preview"]["Period"] = std::max(acquirePeriod, previewPeriod);
         destination["Preview"]["SamplingMode"] = "skipOnFrame";
-        destination["Preview"]["ImageChannels"][0] = nlohmann::json({{"Base", "http://localhost"},
+        destination["Preview"]["ImageChannels"][0] = nlohmann::json({{"Base", systemConfig["Server"]["Address"]},
                                                                      {"Format", "tiff"},
                                                                      {"Mode", PIXEL_MODE[mode]}});
     }
