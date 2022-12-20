@@ -43,6 +43,7 @@
 #define ASIImageFileTemplateString  "ASI_IMG_TEMPLATE"
 #define ASIPixelModeString          "ASI_PX_MODE"
 #define ASIPreviewEnableString      "ASI_PREVIEW_ENABLE"
+#define ASIPreviewPeriodString      "ASI_PREVIEW_PERIOD"
 #define ASILocalTemperatureString   "ASI_TEMP_LOC"
 #define ASIFPGATemperatureString    "ASI_TEMP_FPGA"
 #define ASIChipsTemperatureString   "ASI_TEMP_CHIPS"
@@ -87,6 +88,7 @@ protected:
     int ASIImageFileTemplate;
     int ASIPixelMode;
     int ASIPreviewEnable;
+    int ASIPreviewPeriod;
     int ASILocalTemperature;
     int ASIFPGATemperature;
     int ASIChipsTemperature;
@@ -135,6 +137,7 @@ asiTpx::asiTpx(const char *portName, const char *configFile, int maxBuffers, siz
     createParam(ASIImageFileTemplateString, asynParamOctet, &ASIImageFileTemplate);
     createParam(ASIPixelModeString,         asynParamInt32, &ASIPixelMode);
     createParam(ASIPreviewEnableString,     asynParamInt32, &ASIPreviewEnable);
+    createParam(ASIPreviewPeriodString,     asynParamFloat64, &ASIPreviewPeriod);
     createParam(ASILocalTemperatureString, asynParamFloat64, &ASILocalTemperature);
     createParam(ASIFPGATemperatureString,  asynParamFloat64, &ASIFPGATemperature);
     createParam(ASIChipsTemperatureString, asynParamOctet, &ASIChipsTemperature);
@@ -239,7 +242,8 @@ void asiTpx::asiTpxAcquisitionTask()
     int acquire;
     int arrayCallbacks;
     int imageCounter = 0, numImagesCounter = 0;
-    epicsTimeStamp startTime;
+    double acquirePeriod, previewPeriod;
+    epicsTimeStamp startTime, endTime;
     std::string statusMessage;
     std::string response;
     NDArray *pImage = NULL;
@@ -293,6 +297,8 @@ void asiTpx::asiTpxAcquisitionTask()
         }
         epicsTimeGetCurrent(&startTime);
 
+        getDoubleParam(ADAcquirePeriod, &acquirePeriod);
+        getDoubleParam(ASIPreviewPeriod, &previewPeriod);
         getIntegerParam(NDArrayCallbacks, &arrayCallbacks);
 
         this->unlock();
@@ -358,8 +364,13 @@ void asiTpx::asiTpxAcquisitionTask()
         /* Call the callbacks to update any changes */
         callParamCallbacks();
 
-        /* */
-        epicsThreadSleep(0.5);
+        /* Sync polling frequency with acquisitio/preview period */
+        epicsTimeGetCurrent(&endTime);
+        double elapsedTime = epicsTimeDiffInSeconds(&endTime, &startTime);
+        double delay = std::max(acquirePeriod, previewPeriod) - elapsedTime;
+        printf("elapsed %f delay %f\n", elapsedTime, delay);
+        if (delay > 0.0)
+            epicsThreadSleep(delay);
     }
 }
 
@@ -627,6 +638,7 @@ asynStatus asiTpx::startMeasurement()
     int triggerMode, exposureMode, triggerPolarity, triggerIn, triggerOut;
     double triggerDelay;
     int rawEnabled, imageEnabled, previewEnabled;
+    double previewPeriod;
     std::string response, message;
     const char *functionName = "startMeasurement";
 
@@ -647,6 +659,7 @@ asynStatus asiTpx::startMeasurement()
     getIntegerParam(ASIRawEnable, &rawEnabled);
     getIntegerParam(ASIImageEnable, &imageEnabled);
     getIntegerParam(ASIPreviewEnable, &previewEnabled);
+    getDoubleParam(ASIPreviewPeriod, &previewPeriod);
 
     /* At least one should be enabled */
     if (!rawEnabled && !imageEnabled && !previewEnabled)
@@ -745,7 +758,7 @@ asynStatus asiTpx::startMeasurement()
         int mode;
 
         getIntegerParam(ASIPixelMode, &mode);
-        destination["Preview"]["Period"] = 1.0;
+        destination["Preview"]["Period"] = std::max(acquirePeriod, previewPeriod);
         destination["Preview"]["SamplingMode"] = "skipOnFrame";
         destination["Preview"]["ImageChannels"][0] = nlohmann::json({
             {"Base", "http://localhost"},

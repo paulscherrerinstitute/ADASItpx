@@ -172,7 +172,7 @@ composite {
 		x=9
 		y=636
 		width=350
-		height=110
+		height=60
 	}
 	"composite name"=""
 	"composite file"="ADAttrFile.adl"
@@ -182,7 +182,7 @@ composite {
 		x=10
 		y=35
 		width=350
-		height=340
+		height=215
 	}
 	"composite name"=""
 	"composite file"="ADSetup.adl"
@@ -995,7 +995,7 @@ composite {
 		x=9
 		y=469
 		width=350
-		height=160
+		height=135
 	}
 	"composite name"=""
 	"composite file"="ADBuffers.adl"
@@ -1644,4 +1644,47 @@ polyline {
 		(727,582)
 		(1077,582)
 	}
+}
+"text entry" {
+	object {
+		x=832
+		y=633
+		width=60
+		height=20
+	}
+	control {
+		chan="$(P)$(R)PreviewPeriod"
+		clr=14
+		bclr=51
+	}
+	limits {
+	}
+}
+"text update" {
+	object {
+		x=897
+		y=634
+		width=80
+		height=18
+	}
+	monitor {
+		chan="$(P)$(R)PreviewPeriod_RBV"
+		clr=54
+		bclr=4
+	}
+	limits {
+	}
+}
+text {
+	object {
+		x=737
+		y=633
+		width=80
+		height=20
+	}
+	"basic attribute" {
+		clr=14
+	}
+	textix="Period"
+	align="horiz. right"
 }

@@ -8,3 +8,4 @@ $(P)$(R)ImageFilePath
 $(P)$(R)ImageFileTemplate
 $(P)$(R)PixelMode
 $(P)$(R)PreviewEnable
+$(P)$(R)PreviewPeriod

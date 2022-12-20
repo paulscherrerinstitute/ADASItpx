@@ -384,6 +384,25 @@ record(bi, "$(P)$(R)PreviewEnable_RBV")
     field(SCAN, "I/O Intr")
 }
 
+record(ao, "$(P)$(R)PreviewPeriod")
+{
+    field(PINI, "YES")
+    field(DTYP, "asynFloat64")
+    field(OUT,  "@asyn($(PORT),$(ADDR=0),$(TIMEOUT=1))ASI_PREVIEW_PERIOD")
+    field(EGU , "s")
+    field(PREC, "1")
+    field(VAL,  "0.5")
+}
+
+record(ai, "$(P)$(R)PreviewPeriod_RBV")
+{
+    field(DTYP, "asynFloat64")
+    field(INP,  "@asyn($(PORT),$(ADDR=0),$(TIMEOUT=1))ASI_PREVIEW_PERIOD")
+    field(EGU , "s")
+    field(PREC, "1")
+    field(SCAN, "I/O Intr")
+}
+
 ########## Disable Redundant areaDetector Fields #########
 
 record(longout, "$(P)$(R)NumExposures")
