@@ -10,7 +10,6 @@
 #include <algorithm>
 
 #include <tiffio.h>
-#include <tiffio.hxx>
 
 /* EPICS includes */
 #include <epicsThread.h>
@@ -50,6 +49,9 @@
 #define ASIChipsTemperatureString   "ASI_TEMP_CHIPS"
 #define ASIFansSpeedString          "ASI_FANS_SPEED"
 #define ASIHumidityString           "ASI_HUMIDITY"
+
+/* TIFFStreamOpen routine */
+extern TIFF* TIFFStreamOpen(const char*, std::istream *);
 
 static const char *driverName = "asiTpx";
 static const char *PIXEL_MODE[] = {"count", "tot", "toa", "tof"};
@@ -246,9 +248,9 @@ void asiTpx::asiTpxAcquisitionTask()
     int arrayCallbacks;
     int imageCounter = 0, numImagesCounter = 0;
     double acquirePeriod, previewPeriod;
-    double timeRemaining;
+    double timeRemaining = 0;
     int previewEnabled;
-    int droppedFrames;
+    int droppedFrames = 0;
     epicsTimeStamp startTime, endTime;
     std::string statusMessage;
     std::string response;
@@ -380,7 +382,7 @@ void asiTpx::asiTpxAcquisitionTask()
         /* Sync polling frequency with acquisitio/preview period */
         epicsTimeGetCurrent(&endTime);
         double elapsedTime = epicsTimeDiffInSeconds(&endTime, &startTime);
-        double delay = std::max(acquirePeriod, previewPeriod) - elapsedTime;
+        double delay = std::max<double>(acquirePeriod, previewPeriod) - elapsedTime;
         if (delay > 0.0)
             epicsThreadSleep(delay);
     }
@@ -774,7 +776,7 @@ asynStatus asiTpx::startMeasurement()
         int mode;
 
         getIntegerParam(ASIPixelMode, &mode);
-        destination["Preview"]["Period"] = std::max(acquirePeriod, previewPeriod);
+        destination["Preview"]["Period"] = std::max<double>(acquirePeriod, previewPeriod);
         destination["Preview"]["SamplingMode"] = "skipOnFrame";
         destination["Preview"]["ImageChannels"][0] = nlohmann::json({{"Base", systemConfig["Server"]["Address"]},
                                                                      {"Format", "tiff"},

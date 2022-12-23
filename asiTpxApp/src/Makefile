@@ -8,6 +8,7 @@ LIBRARY_IOC = asiTpx
 USR_CXXFLAGS_Linux += -std=c++11
 
 LIB_SRCS += HTTPClient.cpp
+LIB_SRCS += tif_stream.cpp
 LIB_SRCS += asiTpx.cpp
 
 DBD += asiTpxSupport.dbd
