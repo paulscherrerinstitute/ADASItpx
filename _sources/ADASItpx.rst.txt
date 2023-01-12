@@ -148,7 +148,7 @@ The detector supports 8 trigger modes, which are configured by a combination of 
 Configuration
 -------------
 
-The command to configure an ADVimba camera in the startup script is:
+The command to configure an ASItpx detector in the startup script is:
 ::
 
   asiTpxConfig(const char *portName, const char *configFile,
