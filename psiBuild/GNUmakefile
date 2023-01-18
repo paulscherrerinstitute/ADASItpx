@@ -17,4 +17,4 @@ DBDS += ../asiTpxApp/src/asiTpxSupport.dbd
 TEMPLATES += ../asiTpxApp/Db/asiTpx.template
 TEMPLATES += ../asiTpxApp/Db/asiTpx_settings.req
 
-QT += ../asiTpxApp/op/ui/autoconvert/asiTpx.ui
+QT += ../asiTpxApp/op/ui/autoconvert/ADASItpx.ui
