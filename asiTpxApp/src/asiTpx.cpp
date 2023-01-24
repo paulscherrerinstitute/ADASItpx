@@ -299,6 +299,10 @@ void asiTpx::asiTpxAcquisitionTask()
             numImagesCounter = 0;
             getIntegerParam(ADAcquire, &acquire);
             setIntegerParam(ADNumImagesCounter, numImagesCounter);
+            timeRemaining = 0;
+            setDoubleParam(ADTimeRemaining, timeRemaining);
+            droppedFrames = 0;
+            setIntegerParam(ASIDroppedFrames, droppedFrames);
             setIntegerParam(ADStatus, ADStatusAcquire);
             setStringParam(ADStatusMessage, "Acquiring....");
             callParamCallbacks();
@@ -327,8 +331,12 @@ void asiTpx::asiTpxAcquisitionTask()
             numImagesCounter = dashboard["Measurement"]["FrameCount"];
             timeRemaining = dashboard["Measurement"]["TimeLeft"];
             droppedFrames = dashboard["Measurement"]["DroppedFrames"];
-            if (dashboard["Measurement"]["Status"] == "DA_IDLE")
+            if (dashboard["Measurement"]["Status"] == "DA_IDLE") {
                 acquire = 0;
+                /* serval server (version 2022/06/21 14:04) does not set
+                 * remaining time to 0 after finish. So we force that. */
+                timeRemaining = 0;
+            }
         }
         this->lock();
 
