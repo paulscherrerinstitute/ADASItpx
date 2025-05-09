@@ -7,7 +7,7 @@ The latest untagged master branch can be obtained at https://github.com/paulsche
 Release Notes
 =============
 
-1.0.0 (Janurary XX, 2023)
--------------------------
+1.0.0 (May 9, 2025)
+-------------------
 
 * First release.
