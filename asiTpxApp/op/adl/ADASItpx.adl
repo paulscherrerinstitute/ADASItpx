@@ -1,14 +1,14 @@
 
 file {
 	name="/afs/psi.ch/group/8215/wang/epics_driver_modules/ADASItpx/asiTpxApp/op/adl/ADASItpx.adl"
-	version=030115
+	version=030121
 }
 display {
 	object {
-		x=26
-		y=232
+		x=1401
+		y=633
 		width=1100
-		height=720
+		height=750
 	}
 	clr=14
 	bclr=4
@@ -172,7 +172,7 @@ composite {
 		x=9
 		y=636
 		width=350
-		height=60
+		height=110
 	}
 	"composite name"=""
 	"composite file"="ADAttrFile.adl"
@@ -182,7 +182,7 @@ composite {
 		x=10
 		y=35
 		width=350
-		height=215
+		height=340
 	}
 	"composite name"=""
 	"composite file"="ADSetup.adl"
@@ -995,7 +995,7 @@ composite {
 		x=9
 		y=469
 		width=350
-		height=135
+		height=160
 	}
 	"composite name"=""
 	"composite file"="ADBuffers.adl"
@@ -1743,4 +1743,19 @@ text {
 	}
 	limits {
 	}
+}
+"related display" {
+	object {
+		x=924
+		y=693
+		width=150
+		height=22
+	}
+	display[0] {
+		name="ADASItpxMore.adl"
+		args="P=$(P),R=$(R)"
+	}
+	clr=14
+	bclr=51
+	label="-More settings"
 }
