@@ -1,16 +1,16 @@
 <!DOCTYPE html>
 
-<html lang="en">
+<html lang="en" data-content_root="./">
   <head>
     <meta charset="utf-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="generator" content="Docutils 0.19: https://docutils.sourceforge.io/" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="viewport" content="width=device-width, initial-scale=1" />
 
-    <title>ASI TPX driver &#8212; ADASItpx f9df485 documentation</title>
-    <link rel="stylesheet" type="text/css" href="_static/pygments.css" />
-    <link rel="stylesheet" type="text/css" href="_static/bootstrap-sphinx.css" />
-    <script data-url_root="./" id="documentation_options" src="_static/documentation_options.js"></script>
-    <script src="_static/doctools.js"></script>
-    <script src="_static/sphinx_highlight.js"></script>
+    <title>ASI TPX driver &#8212; ADASItpx 1.1 documentation</title>
+    <link rel="stylesheet" type="text/css" href="_static/pygments.css?v=fa44fd50" />
+    <link rel="stylesheet" type="text/css" href="_static/bootstrap-sphinx.css?v=284a2d1d" />
+    <script src="_static/documentation_options.js?v=56dcb7b8"></script>
+    <script src="_static/doctools.js?v=9bcbadda"></script>
+    <script src="_static/sphinx_highlight.js?v=dc90522c"></script>
     <link rel="index" title="Index" href="genindex.html" />
     <link rel="search" title="Search" href="search.html" />
 <meta charset='utf-8'>
@@ -35,7 +35,7 @@
         </button>
         <a class="navbar-brand" href="#">
           ADASItpx</a>
-        <span class="navbar-text navbar-version pull-left"><b>f9df485</b></span>
+        <span class="navbar-text navbar-version pull-left"><b>1.1</b></span>
       </div>
 
         <div class="collapse navbar-collapse nav-collapse">
@@ -65,6 +65,7 @@
 <li><a class="reference internal" href="#">ASI TPX driver</a><ul>
 <li><a class="reference internal" href="#introduction">Introduction</a></li>
 <li><a class="reference internal" href="#adasitpx-specific-parameters">ADASItpx specific parameters</a><ul>
+<li><a class="reference internal" href="#detector-settings">Detector settings</a></li>
 <li><a class="reference internal" href="#data-output-settings">Data output settings</a></li>
 <li><a class="reference internal" href="#trigger-settings">Trigger settings</a></li>
 </ul>
@@ -110,26 +111,101 @@
 
 <div class="container">
   <div class="row">
-    <div class="body col-md-12 content" role="main">
+      <div class="col-md-3">
+        <div id="sidebar" class="bs-sidenav" role="complementary"><ul>
+<li><a class="reference internal" href="#">ASI TPX driver</a><ul>
+<li><a class="reference internal" href="#introduction">Introduction</a></li>
+<li><a class="reference internal" href="#adasitpx-specific-parameters">ADASItpx specific parameters</a><ul>
+<li><a class="reference internal" href="#detector-settings">Detector settings</a></li>
+<li><a class="reference internal" href="#data-output-settings">Data output settings</a></li>
+<li><a class="reference internal" href="#trigger-settings">Trigger settings</a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#configuration">Configuration</a></li>
+<li><a class="reference internal" href="#medm-screen">MEDM screen</a></li>
+</ul>
+</li>
+</ul>
+
+<div id="sourcelink">
+  <a href="_sources/ADASItpx.rst.txt"
+     rel="nofollow">Source</a>
+</div>
+<form action="search.html" method="get">
+ <div class="form-group">
+  <input type="text" name="q" class="form-control" placeholder="Search" />
+ </div>
+  <input type="hidden" name="check_keywords" value="yes" />
+  <input type="hidden" name="area" value="default" />
+</form>
+        </div>
+      </div>
+    <div class="body col-md-9 content" role="main">
       
   <section id="asi-tpx-driver">
-<h1>ASI TPX driver<a class="headerlink" href="#asi-tpx-driver" title="Permalink to this heading">¶</a></h1>
+<h1>ASI TPX driver<a class="headerlink" href="#asi-tpx-driver" title="Link to this heading">¶</a></h1>
 <dl class="field-list simple">
 <dt class="field-odd">author<span class="colon">:</span></dt>
 <dd class="field-odd"><p>Xiaoqiang Wang</p>
 </dd>
 </dl>
 <section id="introduction">
-<h2>Introduction<a class="headerlink" href="#introduction" title="Permalink to this heading">¶</a></h2>
+<h2>Introduction<a class="headerlink" href="#introduction" title="Link to this heading">¶</a></h2>
 <p>This is an <a class="reference external" href="https://epics-controls.org">EPICS</a> <a class="reference external" href="https://areadetector.github.io/master/index.html">areaDetector</a> driver for <a class="reference external" href="https://www.amscins.com">Amsterdam Scientific Instruments</a> hybrid pixel detectors
 using the Serval HTTP API.</p>
 </section>
 <section id="adasitpx-specific-parameters">
-<h2>ADASItpx specific parameters<a class="headerlink" href="#adasitpx-specific-parameters" title="Permalink to this heading">¶</a></h2>
+<h2>ADASItpx specific parameters<a class="headerlink" href="#adasitpx-specific-parameters" title="Link to this heading">¶</a></h2>
 <p>The ADASItpx driver implements the following parameters in addition
 to those in <a class="reference external" href="https://areadetector.github.io/master/ADCore/ADDriver.html">ADDriver</a>. The records are in asiTpx.template.</p>
+<section id="detector-settings">
+<h3>Detector settings<a class="headerlink" href="#detector-settings" title="Link to this heading">¶</a></h3>
+<table class="table-bordered table-striped table-hover docutils align-default">
+<colgroup>
+<col style="width: 20.0%" />
+<col style="width: 10.0%" />
+<col style="width: 70.0%" />
+</colgroup>
+<thead>
+<tr class="row-odd"><th class="head"><p>EPICS record name</p></th>
+<th class="head"><p>EPICS record type</p></th>
+<th class="head"><p>Description</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td colspan="3"><p> TDC <em>n</em> (n = 0, 1) recording</p></td>
+</tr>
+<tr class="row-odd"><td><p>$(P)$(R)TDC <em>n</em> Enable, $(P)$(R)TDC <em>n</em> Enable_RBV</p></td>
+<td><p>bo, bi</p></td>
+<td><p>Enable TDC <em>n</em> recording</p></td>
+</tr>
+<tr class="row-even"><td><p>$(P)$(R)TDC <em>n</em> Edge, $(P)$(R)TDC <em>n</em> Edge_RBV</p></td>
+<td><p>mbbo, mbbi</p></td>
+<td><p>Record TDC <em>n</em> edge,</p>
+<ul class="simple">
+<li><p>Rising</p></li>
+<li><p>Falling</p></li>
+<li><p>Both</p></li>
+</ul>
+</td>
+</tr>
+<tr class="row-odd"><td><p>$(P)$(R)TDC <em>n</em> Output, $(P)$(R)TDC <em>n</em> Output_RBV</p></td>
+<td><p>mbbo, mbbi</p></td>
+<td><p>Record TDC <em>n</em> channels,</p>
+<ul class="simple">
+<li><p>All channels</p></li>
+<li><p>Channel 0</p></li>
+<li><p>Channel 1</p></li>
+<li><p>Channel 2</p></li>
+<li><p>Channel 3</p></li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+</section>
 <section id="data-output-settings">
-<h3>Data output settings<a class="headerlink" href="#data-output-settings" title="Permalink to this heading">¶</a></h3>
+<h3>Data output settings<a class="headerlink" href="#data-output-settings" title="Link to this heading">¶</a></h3>
 <p>The server supports three output channels,</p>
 <ul class="simple">
 <li><p>Raw - Unprocessed data straight from the detector in tpx3 format.</p></li>
@@ -202,7 +278,7 @@ On starting the measurement the server will connect to the client socket.</p></l
 </table>
 </section>
 <section id="trigger-settings">
-<h3>Trigger settings<a class="headerlink" href="#trigger-settings" title="Permalink to this heading">¶</a></h3>
+<h3>Trigger settings<a class="headerlink" href="#trigger-settings" title="Link to this heading">¶</a></h3>
 <p>The detector supports 8 trigger modes, which are configured by a combination of 3 EPICS records.</p>
 <table class="table-bordered table-striped table-hover docutils align-default">
 <colgroup>
@@ -275,7 +351,7 @@ to $(P)$(R)TriggerSoftware</p></td>
 </section>
 </section>
 <section id="configuration">
-<h2>Configuration<a class="headerlink" href="#configuration" title="Permalink to this heading">¶</a></h2>
+<h2>Configuration<a class="headerlink" href="#configuration" title="Link to this heading">¶</a></h2>
 <p>The command to configure an ASItpx detector in the startup script is:</p>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">asiTpxConfig</span><span class="p">(</span><span class="n">const</span> <span class="n">char</span> <span class="o">*</span><span class="n">portName</span><span class="p">,</span> <span class="n">const</span> <span class="n">char</span> <span class="o">*</span><span class="n">configFile</span><span class="p">,</span>
                  <span class="nb">int</span> <span class="n">maxBuffers</span><span class="p">,</span> <span class="nb">int</span> <span class="n">maxMemory</span><span class="p">,</span> <span class="nb">int</span> <span class="n">priority</span><span class="p">,</span> <span class="nb">int</span> <span class="n">stackSize</span><span class="p">)</span>
@@ -297,9 +373,12 @@ to $(P)$(R)TriggerSoftware</p></td>
 </div>
 </section>
 <section id="medm-screen">
-<h2>MEDM screen<a class="headerlink" href="#medm-screen" title="Permalink to this heading">¶</a></h2>
+<h2>MEDM screen<a class="headerlink" href="#medm-screen" title="Link to this heading">¶</a></h2>
 <figure class="align-center">
 <img alt="_images/ADASItpx.png" src="_images/ADASItpx.png" />
+</figure>
+<figure class="align-center">
+<img alt="_images/ADASItpxMore.png" src="_images/ADASItpxMore.png" />
 </figure>
 </section>
 </section>
@@ -316,8 +395,8 @@ to $(P)$(R)TriggerSoftware</p></td>
       
     </p>
     <p>
-        &copy; Copyright 2022, Xiaoqiang Wang.<br/>
-      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 6.1.3.<br/>
+        &copy; Copyright 2025, Xiaoqiang Wang.<br/>
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 8.2.3.<br/>
     </p>
   </div>
 </footer>
