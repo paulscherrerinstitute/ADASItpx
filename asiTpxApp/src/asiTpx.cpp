@@ -44,6 +44,12 @@
 #define ASIPreviewEnableString      "ASI_PREVIEW_ENABLE"
 #define ASIPreviewPeriodString      "ASI_PREVIEW_PERIOD"
 #define ASIDroppedFramesString      "ASI_DROPPED_FRAMES"
+#define ASITDC1EnableString         "ASI_TDC1_ENABLE"
+#define ASITDC1EdgeString           "ASI_TDC1_EDGE"
+#define ASITDC1OutputString         "ASI_TDC1_OUT"
+#define ASITDC2EnableString         "ASI_TDC2_ENABLE"
+#define ASITDC2EdgeString           "ASI_TDC2_EDGE"
+#define ASITDC2OutputString         "ASI_TDC2_OUT"
 #define ASILocalTemperatureString   "ASI_TEMP_LOC"
 #define ASIFPGATemperatureString    "ASI_TEMP_FPGA"
 #define ASIChipsTemperatureString   "ASI_TEMP_CHIPS"
@@ -55,6 +61,8 @@ extern TIFF* TIFFStreamOpen(const char*, std::istream *);
 
 static const char *driverName = "asiTpx";
 static const char *PIXEL_MODE[] = {"count", "tot", "toa", "tof"};
+static const char *TDC_EDGE[] = {"P", "N", "PN"}; /* Rising, Falling, Both */
+static const char *TDC_OUTPUT[] = {"0123", "0", "1", "2", "3"}; /* All, Channel 0 - 3 */
 
 static void asiTpxAcquisitionTaskC(void *drvPvt);
 static void asiTpxPollTaskC(void *drvPvt);
@@ -93,6 +101,12 @@ protected:
     int ASIPreviewEnable;
     int ASIPreviewPeriod;
     int ASIDroppedFrames;
+    int ASITDC1Enable;
+    int ASITDC1Edge;
+    int ASITDC1Output;
+    int ASITDC2Enable;
+    int ASITDC2Edge;
+    int ASITDC2Output;
     int ASILocalTemperature;
     int ASIFPGATemperature;
     int ASIChipsTemperature;
@@ -143,6 +157,12 @@ asiTpx::asiTpx(const char *portName, const char *configFile, int maxBuffers, siz
     createParam(ASIPreviewEnableString,     asynParamInt32, &ASIPreviewEnable);
     createParam(ASIPreviewPeriodString,     asynParamFloat64, &ASIPreviewPeriod);
     createParam(ASIDroppedFramesString,     asynParamInt32, &ASIDroppedFrames);
+    createParam(ASITDC1EnableString,       asynParamInt32, &ASITDC1Enable);
+    createParam(ASITDC1EdgeString,         asynParamInt32, &ASITDC1Edge);
+    createParam(ASITDC1OutputString,       asynParamInt32, &ASITDC1Output);
+    createParam(ASITDC2EnableString,       asynParamInt32, &ASITDC2Enable);
+    createParam(ASITDC2EdgeString,         asynParamInt32, &ASITDC2Edge);
+    createParam(ASITDC2OutputString,       asynParamInt32, &ASITDC2Output);
     createParam(ASILocalTemperatureString, asynParamFloat64, &ASILocalTemperature);
     createParam(ASIFPGATemperatureString,  asynParamFloat64, &ASIFPGATemperature);
     createParam(ASIChipsTemperatureString, asynParamOctet, &ASIChipsTemperature);
@@ -663,6 +683,8 @@ asynStatus asiTpx::startMeasurement()
     int imageMode, numImages;
     int triggerMode, exposureMode, triggerPolarity, triggerIn, triggerOut;
     double triggerDelay;
+    int tdc1Enable, tdc1Edge, tdc1Output, tdc2Enable, tdc2Edge, tdc2Output;
+    std::string tdc1, tdc2;
     int rawEnabled, imageEnabled, previewEnabled;
     double previewPeriod;
     std::string response, message;
@@ -678,6 +700,13 @@ asynStatus asiTpx::startMeasurement()
     getDoubleParam(ASITriggerDelay, &triggerDelay);
     getIntegerParam(ASITriggerIn, &triggerIn);
     getIntegerParam(ASITriggerOut, &triggerOut);
+
+    getIntegerParam(ASITDC1Enable, &tdc1Enable);
+    getIntegerParam(ASITDC1Edge, &tdc1Edge);
+    getIntegerParam(ASITDC1Output, &tdc1Output);
+    getIntegerParam(ASITDC2Enable, &tdc2Enable);
+    getIntegerParam(ASITDC2Edge, &tdc2Edge);
+    getIntegerParam(ASITDC2Output, &tdc2Output);
 
     getIntegerParam(ADNumImages, &numImages);
     getIntegerParam(ADImageMode, &imageMode);
@@ -728,6 +757,14 @@ asynStatus asiTpx::startMeasurement()
         else
             config["TriggerMode"] = "SOFTWARESTART_SOFTWARESTOP";
     }
+
+    if (tdc1Enable)
+        tdc1 = std::string(TDC_EDGE[tdc1Edge]) + TDC_OUTPUT[tdc1Output];
+
+    if (tdc2Enable)
+        tdc2 = std::string(TDC_EDGE[tdc2Edge]) + TDC_OUTPUT[tdc2Output];
+
+    config["Tdc"] = {tdc1, tdc2};
 
     if (!httpClient.put("/detector/config", config.dump(), response))
     {

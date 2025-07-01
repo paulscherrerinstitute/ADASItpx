@@ -1,4 +1,10 @@
 file "ADBase_settings.req", P=$(P), R=$(R)
+$(P)$(R)TDC1Enable
+$(P)$(R)TDC1Edge
+$(P)$(R)TDC1Output
+$(P)$(R)TDC2Enable
+$(P)$(R)TDC2Edge
+$(P)$(R)TDC2Output
 $(P)$(R)TriggerPolarity
 $(P)$(R)RawEnable
 $(P)$(R)RawFilePath

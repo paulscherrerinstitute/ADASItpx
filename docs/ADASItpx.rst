@@ -22,6 +22,39 @@ ADASItpx specific parameters
 The ADASItpx driver implements the following parameters in addition
 to those in `ADDriver`_. The records are in asiTpx.template.
 
+Detector settings
+^^^^^^^^^^^^^^^^^
+
+.. cssclass:: table-bordered table-striped table-hover
+.. flat-table::
+  :header-rows: 1
+  :widths: 20 10 70
+
+  * - EPICS record name
+    - EPICS record type
+    - Description
+  * - :cspan:`2` TDC *n* (n = 0, 1) recording
+  * - $(P)$(R)TDC *n* Enable, $(P)$(R)TDC *n* Enable_RBV
+    - bo, bi
+    - Enable TDC *n* recording
+  * - $(P)$(R)TDC *n* Edge, $(P)$(R)TDC *n* Edge_RBV
+    - mbbo, mbbi
+    - Record TDC *n* edge,
+
+      - Rising
+      - Falling
+      - Both
+  * - $(P)$(R)TDC *n* Output, $(P)$(R)TDC *n* Output_RBV
+    - mbbo, mbbi
+    - Record TDC *n* channels,
+
+      - All channels
+      - Channel 0
+      - Channel 1
+      - Channel 2
+      - Channel 3
+
+
 Data output settings
 ^^^^^^^^^^^^^^^^^^^^
 
@@ -173,4 +206,7 @@ MEDM screen
 -----------
 
 .. figure:: _static/ADASItpx.png
+    :align: center
+
+.. figure:: _static/ADASItpxMore.png
     :align: center

@@ -182,6 +182,166 @@ record(mbbi, "$(P)$(R)TriggerOutput_RBV")
     field(SCAN, "I/O Intr")
 }
 
+############ Detector Settings #########
+
+record(bo, "$(P)$(R)TDC1Enable")
+{
+    field(PINI, "YES")
+    field(DTYP, "asynInt32")
+    field(OUT,  "@asyn($(PORT),$(ADDR=0),$(TIMEOUT=1))ASI_TDC1_ENABLE")
+    field(ZNAM, "No")
+    field(ONAM, "Yes")
+    field(VAL,  "0")
+}
+
+record(bi, "$(P)$(R)TDC1Enable_RBV")
+{
+    field(DTYP, "asynInt32")
+    field(INP,  "@asyn($(PORT),$(ADDR=0),$(TIMEOUT=1))ASI_TDC1_ENABLE")
+    field(ZNAM, "No")
+    field(ONAM, "Yes")
+    field(SCAN, "I/O Intr")
+}
+
+record(mbbo, "$(P)$(R)TDC1Edge")
+{
+    field(PINI, "YES")
+    field(DTYP, "asynInt32")
+    field(OUT,  "@asyn($(PORT),$(ADDR=0),$(TIMEOUT=1))ASI_TDC1_EDGE")
+    field(ZRVL, "0")
+    field(ZRST, "Rising")
+    field(ONVL, "1")
+    field(ONST, "Falling")
+    field(TWVL, "2")
+    field(TWST, "Both")
+}
+
+record(mbbi, "$(P)$(R)TDC1Edge_RBV")
+{
+    field(DTYP, "asynInt32")
+    field(INP,  "@asyn($(PORT),$(ADDR=0),$(TIMEOUT=1))ASI_TDC1_EDGE")
+    field(ZRVL, "0")
+    field(ZRST, "Rising")
+    field(ONVL, "1")
+    field(ONST, "Falling")
+    field(TWVL, "2")
+    field(TWST, "Both")
+    field(SCAN, "I/O Intr")
+}
+
+record(mbbo, "$(P)$(R)TDC1Output")
+{
+    field(PINI, "YES")
+    field(DTYP, "asynInt32")
+    field(OUT,  "@asyn($(PORT),$(ADDR=0),$(TIMEOUT=1))ASI_TDC1_OUT")
+    field(ZRVL, "0")
+    field(ZRST, "All channels")
+    field(ONVL, "1")
+    field(ONST, "Channel 0")
+    field(TWVL, "2")
+    field(TWST, "Channel 1")
+    field(THVL, "3")
+    field(THST, "Channel 2")
+    field(FRVL, "4")
+    field(FRST, "Channel 3")
+}
+
+record(mbbi, "$(P)$(R)TDC1Output_RBV")
+{
+    field(DTYP, "asynInt32")
+    field(INP,  "@asyn($(PORT),$(ADDR=0),$(TIMEOUT=1))ASI_TDC1_OUT")
+    field(ZRVL, "0")
+    field(ZRST, "All channels")
+    field(ONVL, "1")
+    field(ONST, "Channel 0")
+    field(TWVL, "2")
+    field(TWST, "Channel 1")
+    field(THVL, "3")
+    field(THST, "Channel 2")
+    field(FRVL, "4")
+    field(FRST, "Channel 3")
+    field(SCAN, "I/O Intr")
+}
+
+record(bo, "$(P)$(R)TDC2Enable")
+{
+    field(PINI, "YES")
+    field(DTYP, "asynInt32")
+    field(OUT,  "@asyn($(PORT),$(ADDR=0),$(TIMEOUT=1))ASI_TDC2_ENABLE")
+    field(ZNAM, "No")
+    field(ONAM, "Yes")
+    field(VAL,  "0")
+}
+
+record(bi, "$(P)$(R)TDC2Enable_RBV")
+{
+    field(DTYP, "asynInt32")
+    field(INP,  "@asyn($(PORT),$(ADDR=0),$(TIMEOUT=1))ASI_TDC2_ENABLE")
+    field(ZNAM, "No")
+    field(ONAM, "Yes")
+    field(SCAN, "I/O Intr")
+}
+
+record(mbbo, "$(P)$(R)TDC2Edge")
+{
+    field(PINI, "YES")
+    field(DTYP, "asynInt32")
+    field(OUT,  "@asyn($(PORT),$(ADDR=0),$(TIMEOUT=1))ASI_TDC2_EDGE")
+    field(ZRVL, "0")
+    field(ZRST, "Rising")
+    field(ONVL, "1")
+    field(ONST, "Falling")
+    field(TWVL, "2")
+    field(TWST, "Both")
+}
+
+record(mbbi, "$(P)$(R)TDC2Edge_RBV")
+{
+    field(DTYP, "asynInt32")
+    field(INP,  "@asyn($(PORT),$(ADDR=0),$(TIMEOUT=1))ASI_TDC2_EDGE")
+    field(ZRVL, "0")
+    field(ZRST, "Rising")
+    field(ONVL, "1")
+    field(ONST, "Falling")
+    field(TWVL, "2")
+    field(TWST, "Both")
+    field(SCAN, "I/O Intr")
+}
+
+record(mbbo, "$(P)$(R)TDC2Output")
+{
+    field(PINI, "YES")
+    field(DTYP, "asynInt32")
+    field(OUT,  "@asyn($(PORT),$(ADDR=0),$(TIMEOUT=1))ASI_TDC2_OUT")
+    field(ZRVL, "0")
+    field(ZRST, "All channels")
+    field(ONVL, "1")
+    field(ONST, "Channel 0")
+    field(TWVL, "2")
+    field(TWST, "Channel 1")
+    field(THVL, "3")
+    field(THST, "Channel 2")
+    field(FRVL, "4")
+    field(FRST, "Channel 3")
+}
+
+record(mbbi, "$(P)$(R)TDC2Output_RBV")
+{
+    field(DTYP, "asynInt32")
+    field(INP,  "@asyn($(PORT),$(ADDR=0),$(TIMEOUT=1))ASI_TDC2_OUT")
+    field(ZRVL, "0")
+    field(ZRST, "All channels")
+    field(ONVL, "1")
+    field(ONST, "Channel 0")
+    field(TWVL, "2")
+    field(TWST, "Channel 1")
+    field(THVL, "3")
+    field(THST, "Channel 2")
+    field(FRVL, "4")
+    field(FRST, "Channel 3")
+    field(SCAN, "I/O Intr")
+}
+
 ########## Detector Health #########
 
 record(ai, "$(P)$(R)LocalTemperature_RBV")
