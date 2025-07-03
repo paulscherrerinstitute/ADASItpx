@@ -788,6 +788,10 @@ asynStatus asiTpx::startMeasurement()
         getStringParam(ASIRawFileTemplate, pattern);
         if (path.find("tcp://") == std::string::npos && path.find("http://") == std::string::npos)
             path = "file://" + path;
+        else
+            if (destination["Raw"][0].contains("SplitStrategy"))
+                destination["Raw"][0].erase("SplitStrategy");
+
         destination["Raw"][0]["Base"] = path;
         destination["Raw"][0]["FilePattern"] = pattern;
     }
