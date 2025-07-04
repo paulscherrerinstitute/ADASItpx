@@ -61,13 +61,13 @@ Data output settings
 The server supports three output channels,
 
 * Raw - Unprocessed data straight from the detector in tpx3 format.
-* Image - Two-dimensional images at detector acquisition framerate in TIFF format.
+* Image - Two-dimensional images at detector acquisition framerate, in TIFF format for file scheme and jsonimage format for tcp scheme.
 * Preview - Two-dimensional images at preview framerate.
 
-The output file path of each channel can be one of the following:
+The output scheme of each channel can be one of the following:
 
 * A physical file path on the server host, e.g. "/tmp".
-* An HTTP host URL, e.g. "\http://localhost:8080". In such a case the image is accessible via URL "\http://localhost:8080/measurement/image".
+* For Image and Preview outputs, an HTTP host URL, e.g. "\http://localhost:8080". In such a case the image is accessible via URL "\http://localhost:8080/measurement/image".
 * A TCP address,
 
   * "tcp://listen@localhost:1234". Server opens a socket at the specified port at the start of a measurement.
@@ -75,7 +75,8 @@ The output file path of each channel can be one of the following:
   * "tcp://connect@localhost:1234". The client opens a TCP socket at the specified address and port.
     On starting the measurement the server will connect to the client socket.
 
-.. note:: In this driver, the preview image output is fixed to the server host URL. The driver polls this URL and read into NDArrays.
+.. note:: In this driver, the Preview output is fixed to the server host URL. The driver polls this URL and read into NDArrays.
+.. warning:: Because only one http scheme output can be configured, the Image output can only use file or tcp scheme.
 
 
 .. cssclass:: table-bordered table-striped table-hover
