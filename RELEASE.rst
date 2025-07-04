@@ -7,6 +7,11 @@ The latest untagged master branch can be obtained at https://github.com/paulsche
 Release Notes
 =============
 
+1.2.0 (July 4, 2025)
+--------------------
+
+* Fix Raw and Image outputs with tcp scheme.
+
 1.1.0 (July 1, 2025)
 -------------------
 
