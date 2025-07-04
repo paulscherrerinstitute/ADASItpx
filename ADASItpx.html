@@ -5,10 +5,10 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="viewport" content="width=device-width, initial-scale=1" />
 
-    <title>ASI TPX driver &#8212; ADASItpx 1.1 documentation</title>
+    <title>ASI TPX driver &#8212; ADASItpx 1.2 documentation</title>
     <link rel="stylesheet" type="text/css" href="_static/pygments.css?v=fa44fd50" />
     <link rel="stylesheet" type="text/css" href="_static/bootstrap-sphinx.css?v=284a2d1d" />
-    <script src="_static/documentation_options.js?v=56dcb7b8"></script>
+    <script src="_static/documentation_options.js?v=61243dd2"></script>
     <script src="_static/doctools.js?v=9bcbadda"></script>
     <script src="_static/sphinx_highlight.js?v=dc90522c"></script>
     <link rel="index" title="Index" href="genindex.html" />
@@ -35,7 +35,7 @@
         </button>
         <a class="navbar-brand" href="#">
           ADASItpx</a>
-        <span class="navbar-text navbar-version pull-left"><b>1.1</b></span>
+        <span class="navbar-text navbar-version pull-left"><b>1.2</b></span>
       </div>
 
         <div class="collapse navbar-collapse nav-collapse">
@@ -209,13 +209,13 @@ to those in <a class="reference external" href="https://areadetector.github.io/m
 <p>The server supports three output channels,</p>
 <ul class="simple">
 <li><p>Raw - Unprocessed data straight from the detector in tpx3 format.</p></li>
-<li><p>Image - Two-dimensional images at detector acquisition framerate in TIFF format.</p></li>
+<li><p>Image - Two-dimensional images at detector acquisition framerate, in TIFF format for file scheme and jsonimage format for tcp scheme.</p></li>
 <li><p>Preview - Two-dimensional images at preview framerate.</p></li>
 </ul>
-<p>The output file path of each channel can be one of the following:</p>
+<p>The output scheme of each channel can be one of the following:</p>
 <ul class="simple">
 <li><p>A physical file path on the server host, e.g. “/tmp”.</p></li>
-<li><p>An HTTP host URL, e.g. “http://localhost:8080”. In such a case the image is accessible via URL “http://localhost:8080/measurement/image”.</p></li>
+<li><p>For Image and Preview outputs, an HTTP host URL, e.g. “http://localhost:8080”. In such a case the image is accessible via URL “http://localhost:8080/measurement/image”.</p></li>
 <li><p>A TCP address,</p>
 <ul>
 <li><p>“<a class="reference external" href="tcp://listen&#64;localhost:1234">tcp://listen&#64;localhost:1234</a>”. Server opens a socket at the specified port at the start of a measurement.
@@ -227,7 +227,11 @@ On starting the measurement the server will connect to the client socket.</p></l
 </ul>
 <div class="admonition note">
 <p class="admonition-title">Note</p>
-<p>In this driver, the preview image output is fixed to the server host URL. The driver polls this URL and read into NDArrays.</p>
+<p>In this driver, the Preview output is fixed to the server host URL. The driver polls this URL and read into NDArrays.</p>
+</div>
+<div class="admonition warning">
+<p class="admonition-title">Warning</p>
+<p>Because only one http scheme output can be configured, the Image output can only use file or tcp scheme.</p>
 </div>
 <table class="table-bordered table-striped table-hover docutils align-default">
 <colgroup>
