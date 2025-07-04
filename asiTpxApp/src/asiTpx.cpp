@@ -812,7 +812,10 @@ asynStatus asiTpx::startMeasurement()
             path = "file://" + path;
         destination["Image"][0]["Base"] = path;
         destination["Image"][0]["FilePattern"] = pattern;
-        destination["Image"][0]["Format"] = "tiff";
+        if (path.find("tcp://") == 0)
+            destination["Image"][0]["Format"] = "jsonimage";
+        else
+            destination["Image"][0]["Format"] = "tiff";
         destination["Image"][0]["Mode"] = PIXEL_MODE[mode];
     }
     else
