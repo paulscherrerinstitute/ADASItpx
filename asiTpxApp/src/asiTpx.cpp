@@ -422,7 +422,7 @@ static void asiTpxPollTaskC(void *drvPvt)
     pPvt->asiTpxPollTask();
 }
 
-/** Task to acquire from the detector and send them up to areaDetector.
+/** Task to poll live images from the detector and send them up to areaDetector.
  *
  *  It is started in the class constructor and must not return until the IOC stops.
  *
