@@ -12,7 +12,6 @@ LIB_SRCS += asiTpx.cpp
 
 DBD += asiTpxSupport.dbd
 
-USR_SYS_LIBS_Linux += tiff
 USR_SYS_LIBS_WIN32 += ws2_32
 
 PROD_IOC = test_acquisition
