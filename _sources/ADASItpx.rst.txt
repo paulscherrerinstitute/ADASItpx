@@ -75,9 +75,9 @@ The output scheme of each channel can be one of the following:
   * "tcp://connect@localhost:1234". The client opens a TCP socket at the specified address and port.
     On starting the measurement the server will connect to the client socket.
 
-.. note:: In this driver, the Preview output is fixed to the server host URL. The driver polls this URL and read into NDArrays.
-.. warning:: Because only one http scheme output can be configured, the Image output can only use file or tcp scheme.
-
+Data from the Image and Preview channels can be received into NDArrays for the areaDetector pipeline.
+The actual source is selected by DataSource PV. IOC runs a TCP server to receive jsonimage format data from the detector server.
+The server address is configured in the :ref:`configFile`.
 
 .. cssclass:: table-bordered table-striped table-hover
 .. flat-table::
@@ -108,10 +108,15 @@ The output scheme of each channel can be one of the following:
   * - $(P)$(R)ImageFileTemplate, $(P)$(R)ImageFileTemplate_RBV
     - waveform
     - image output file name prefix
-  * - $(P)$(R)PreviewEnable, $(P)$(R)PreviewEnable_RBV
+  * - $(P)$(R)PreviewPeriod, $(P)$(R)PreviewPeriod_RBV
+    - bo, bi
+    - Period for preview image output.
+  * - $(P)$(R)DataSource, $(P)$(R)DataSource_RBV
     - mbbo, mbbi
-    - Enable preview image output.
-
+    - Which data source to use for areaDetector pipeline. Valid options:
+        * None
+        * Preview
+        * Image
 
 Trigger settings
 ^^^^^^^^^^^^^^^^
@@ -178,6 +183,7 @@ The detector supports 8 trigger modes, which are configured by a combination of 
     - Acq. is started by writting 1 to $(P)$(R)TriggerSoftware, stopped by writting 0
       to $(P)$(R)TriggerSoftware
 
+.. _configFile:
 
 Configuration
 -------------
@@ -188,7 +194,7 @@ The command to configure an ASItpx detector in the startup script is:
   asiTpxConfig(const char *portName, const char *configFile,
                    int maxBuffers, int maxMemory, int priority, int stackSize)
 
-The *configFile* is a json file, which specifies the server address and detector DACS and BPC file path, e.g. ::
+The *configFile* is a json file, which specifies the server address, detector DACS and BPC file path, and image receiver server address, e.g. ::
 
   {
       "Server": {
@@ -199,6 +205,9 @@ The *configFile* is a json file, which specifies the server address and detector
               "PixelConfig": "/home/scratch/asi_tpx3/asi-server-300-tpx3/examples/tpx3/tpx3-demo.bpc",
               "DACS": "/home/scratch/asi_tpx3/asi-server-300-tpx3/examples/tpx3/tpx3-demo.dacs"
           }
+      },
+      "ImageReceiver": {
+          "Address": "localhost:65432"
       }
   }
 
