@@ -9,8 +9,6 @@
 #include <cmath>
 #include <algorithm>
 
-#include <tiffio.h>
-
 /* EPICS includes */
 #include <epicsThread.h>
 #include <epicsEvent.h>
@@ -41,7 +39,7 @@
 #define ASIImageFilePathString      "ASI_IMG_PATH"
 #define ASIImageFileTemplateString  "ASI_IMG_TEMPLATE"
 #define ASIPixelModeString          "ASI_PX_MODE"
-#define ASIPreviewEnableString      "ASI_PREVIEW_ENABLE"
+#define ASIDataSourceString         "ASI_DATA_SOURCE"
 #define ASIPreviewPeriodString      "ASI_PREVIEW_PERIOD"
 #define ASIDroppedFramesString      "ASI_DROPPED_FRAMES"
 #define ASITDC1EnableString         "ASI_TDC1_ENABLE"
@@ -56,9 +54,6 @@
 #define ASIFansSpeedString          "ASI_FANS_SPEED"
 #define ASIHumidityString           "ASI_HUMIDITY"
 
-/* TIFFStreamOpen routine */
-extern TIFF* TIFFStreamOpen(const char*, std::istream *);
-
 static const char *driverName = "asiTpx";
 static const char *PIXEL_MODE[] = {"count", "tot", "toa", "tof"};
 static const char *TDC_EDGE[] = {"P", "N", "PN"}; /* Rising, Falling, Both */
@@ -66,6 +61,13 @@ static const char *TDC_OUTPUT[] = {"0123", "0", "1", "2", "3"}; /* All, Channel 
 
 static void asiTpxAcquisitionTaskC(void *drvPvt);
 static void asiTpxPollTaskC(void *drvPvt);
+static void asiTpxImageTaskC(void *drvPvt);
+
+enum {
+    DATA_SOURCE_NONE = 0,
+    DATA_SOURCE_PREVIEW = 1,
+    DATA_SOURCE_IMAGE = 2
+};
 
 class asiTpx : public ADDriver
 {
@@ -76,13 +78,14 @@ public:
     void report(FILE *fp, int details);
     void asiTpxAcquisitionTask();
     void asiTpxPollTask();
+    void asiTpxImageTask();
 
 protected:
     asynStatus connectServer();
     asynStatus startMeasurement();
     asynStatus stopMeasurement();
 
-    NDArray *readTiffImage(TIFF *tiff);
+    NDArray *readJsonImage(SOCKET s);
 
     int ASIExposureMode;
 #define FIRST_ASITPX_PARAM ASIExposureMode
@@ -98,7 +101,7 @@ protected:
     int ASIImageFilePath;
     int ASIImageFileTemplate;
     int ASIPixelMode;
-    int ASIPreviewEnable;
+    int ASIDataSource;
     int ASIPreviewPeriod;
     int ASIDroppedFrames;
     int ASITDC1Enable;
@@ -154,7 +157,7 @@ asiTpx::asiTpx(const char *portName, const char *configFile, int maxBuffers, siz
     createParam(ASIImageFilePathString,     asynParamOctet, &ASIImageFilePath);
     createParam(ASIImageFileTemplateString, asynParamOctet, &ASIImageFileTemplate);
     createParam(ASIPixelModeString,         asynParamInt32, &ASIPixelMode);
-    createParam(ASIPreviewEnableString,     asynParamInt32, &ASIPreviewEnable);
+    createParam(ASIDataSourceString,        asynParamInt32, &ASIDataSource);
     createParam(ASIPreviewPeriodString,     asynParamFloat64, &ASIPreviewPeriod);
     createParam(ASIDroppedFramesString,     asynParamInt32, &ASIDroppedFrames);
     createParam(ASITDC1EnableString,       asynParamInt32, &ASITDC1Enable);
@@ -237,6 +240,11 @@ asiTpx::asiTpx(const char *portName, const char *configFile, int maxBuffers, siz
                   driverName, functionName);
     }
 
+    /* Create the image receiver thread */
+    status = (epicsThreadCreate("ASItpxImageTask",
+        epicsThreadPriorityMedium, epicsThreadGetStackSize(epicsThreadStackMedium),
+        (EPICSTHREADFUNC)asiTpxImageTaskC, this) == NULL);
+
     /* Create the poll thread */
     status = (epicsThreadCreate("ASItpxPollTask",
                                 epicsThreadPriorityMedium, epicsThreadGetStackSize(epicsThreadStackMedium),
@@ -266,15 +274,13 @@ void asiTpx::asiTpxAcquisitionTask()
     int adStatus;
     int acquire;
     int arrayCallbacks;
-    int imageCounter = 0, numImagesCounter = 0;
+    int numImagesCounter = 0;
     double acquirePeriod, previewPeriod;
     double timeRemaining = 0;
-    int previewEnabled;
     int droppedFrames = 0;
     epicsTimeStamp startTime, endTime;
     std::string statusMessage;
     std::string response;
-    NDArray *pImage = NULL;
     const char *functionName = "asiTpxAcquisitionTask";
 
     this->lock();
@@ -329,20 +335,11 @@ void asiTpx::asiTpxAcquisitionTask()
         }
         epicsTimeGetCurrent(&startTime);
 
-        getIntegerParam(ASIPreviewEnable, &previewEnabled);
         getDoubleParam(ADAcquirePeriod, &acquirePeriod);
         getDoubleParam(ASIPreviewPeriod, &previewPeriod);
         getIntegerParam(NDArrayCallbacks, &arrayCallbacks);
 
         this->unlock();
-
-        /* Preview image */
-        if (previewEnabled && httpClient.get("/measurement/image", response))
-        {
-            std::istringstream stream(response);
-            TIFF *tiff = TIFFStreamOpen("memfile", &stream);
-            pImage = readTiffImage(tiff);
-        }
 
         /* Poll measurement progress */
         if (httpClient.get("/dashboard", response))
@@ -364,36 +361,6 @@ void asiTpx::asiTpxAcquisitionTask()
         setIntegerParam(ASIDroppedFrames, droppedFrames);
         setIntegerParam(ADNumImagesCounter, numImagesCounter);
 
-        if (pImage)
-        {
-            getIntegerParam(NDArrayCounter, &imageCounter);
-            imageCounter++;
-            setIntegerParam(NDArrayCounter, imageCounter);
-
-            /* Put the frame number and time stamp into the buffer */
-            pImage->uniqueId = imageCounter;
-            pImage->timeStamp = startTime.secPastEpoch + startTime.nsec / 1.e9;
-            updateTimeStamp(&pImage->epicsTS);
-
-            /* Get any attributes that have been defined for this driver */
-            this->getAttributes(pImage->pAttributeList);
-
-            if (arrayCallbacks)
-            {
-               /* Must release the lock here, or we can get into a deadlock, because we can
-                * block on the plugin lock, and the plugin can be calling us */
-                this->unlock();
-                asynPrint(this->pasynUserSelf, ASYN_TRACE_FLOW,
-                          "%s:%s: Calling NDArray callback\n",
-                          driverName, functionName);
-                doCallbacksGenericPointer(pImage, NDArrayData, 0);
-                this->lock();
-            }
-            /* Free the image buffer */
-            pImage->release();
-            pImage = NULL;
-        }
-
         /* Check to see if acquisition is complete */
         if (!acquire)
         {
@@ -407,10 +374,10 @@ void asiTpx::asiTpxAcquisitionTask()
         /* Call the callbacks to update any changes */
         callParamCallbacks();
 
-        /* Sync polling frequency with acquisitio/preview period */
+        /* Sync polling frequency with acquisitio period */
         epicsTimeGetCurrent(&endTime);
         double elapsedTime = epicsTimeDiffInSeconds(&endTime, &startTime);
-        double delay = std::max<double>(acquirePeriod, previewPeriod) - elapsedTime;
+        double delay = acquirePeriod - elapsedTime;
         if (delay > 0.0)
             epicsThreadSleep(delay);
     }
@@ -458,6 +425,118 @@ void asiTpx::asiTpxPollTask()
         }
         epicsThreadSleep(5);
     }
+}
+
+static void asiTpxImageTaskC(void *drvPvt)
+{
+    asiTpx *pPvt = (asiTpx *)drvPvt;
+    pPvt->asiTpxImageTask();
+}
+
+/** Task to receive image from the detector and send them up to areaDetector */
+void asiTpx::asiTpxImageTask()
+{
+    const char *functionName = "asiTpxImageTask";
+
+    /* TCP server to receive images */
+    SOCKET s = epicsSocketCreate(PF_INET, SOCK_STREAM, 0);
+    if (s == INVALID_SOCKET) {
+        char error[128];
+        epicsSocketConvertErrnoToString(error, sizeof(error));
+        asynPrint(this->pasynUserSelf, ASYN_TRACE_ERROR,
+                  "%s:%s: Failed to create socket: %s\n",
+                  driverName, functionName, error);
+        return;
+    }
+    epicsSocketEnableAddressReuseDuringTimeWaitState(s);
+
+    struct sockaddr_in serverAddr = {};
+    serverAddr.sin_family = AF_INET;
+    std::string receiverAddress = systemConfig["ImageReceiver"]["Address"];
+    size_t pos = receiverAddress.find(":");
+    if (pos == std::string::npos) {
+        asynPrint(this->pasynUserSelf, ASYN_TRACE_ERROR,
+            "%s:%s: Wrong receiver address: %s\n",
+            driverName, functionName, receiverAddress.c_str());
+        return;
+    }
+
+    hostToIPAddr(receiverAddress.substr(0, pos).c_str(), &serverAddr.sin_addr);
+    serverAddr.sin_port = htons(std::stoi(receiverAddress.substr(pos + 1))); 
+
+    int status = bind(s, (struct sockaddr *) &serverAddr, sizeof (serverAddr));
+    if (status < 0) {
+        char error[128];
+        epicsSocketConvertErrnoToString(error, sizeof(error));
+        asynPrint(this->pasynUserSelf, ASYN_TRACE_ERROR,
+                  "%s:%s: Failed to create socket: %s\n",
+                  driverName, functionName, error);
+        epicsSocketDestroy(s);
+        return;
+    }
+
+    if (listen(s, 0) < 0) {
+        char error[128];
+        epicsSocketConvertErrnoToString(error, sizeof(error));
+        asynPrint(this->pasynUserSelf, ASYN_TRACE_ERROR,
+                  "%s:%s: Failed to listen on socket: %s\n",
+                  driverName, functionName, error);
+        epicsSocketDestroy(s);
+        return;
+    }
+
+    while (true) {
+        struct sockaddr_in clientAddr;
+        socklen_t clientAddrLen = sizeof(clientAddr);
+        SOCKET c = epicsSocketAccept(s, (struct sockaddr *)&clientAddr, &clientAddrLen);
+        if (SOCKERRNO == SOCK_EBADF || SOCKERRNO == SOCK_ENOTSOCK) {
+            char error[128];
+            epicsSocketConvertErrnoToString(error, sizeof(error));
+            asynPrint(this->pasynUserSelf, ASYN_TRACE_ERROR,
+                      "%s:%s: Failed to accept connection: %s\n",
+                      driverName, functionName, error);
+            break;
+        }
+        if (c == INVALID_SOCKET) {
+            char error[128];
+            epicsSocketConvertErrnoToString(error, sizeof(error));
+            asynPrint(this->pasynUserSelf, ASYN_TRACE_ERROR,
+                      "%s:%s: Failed to accept connection: %s\n",
+                      driverName, functionName, error);
+            continue;
+        }
+
+        while (NDArray *pArray = readJsonImage(c)) {
+            lock();
+            int imageCounter, arrayCallbacks;
+            getIntegerParam(NDArrayCallbacks, &arrayCallbacks);
+            getIntegerParam(NDArrayCounter, &imageCounter);
+            imageCounter++;
+            setIntegerParam(NDArrayCounter, imageCounter);
+
+            /* Put the frame number and time stamp into the buffer */
+            pArray->uniqueId = imageCounter;
+            updateTimeStamp(&pArray->epicsTS);
+
+            /* Get any attributes that have been defined for this driver */
+            this->getAttributes(pArray->pAttributeList);
+            this->unlock();
+
+            if (arrayCallbacks)
+            {
+                asynPrint(this->pasynUserSelf, ASYN_TRACE_FLOW,
+                            "%s:%s: Calling NDArray callback\n",
+                            driverName, functionName);
+                doCallbacksGenericPointer(pArray, NDArrayData, 0);
+            }
+            /* Free the image buffer */
+            pArray->release();
+        }
+
+        epicsSocketDestroy(c);
+    }
+
+    epicsSocketDestroy(s);
 }
 
 /** Called when asyn clients call pasynInt32->write().
@@ -685,7 +764,7 @@ asynStatus asiTpx::startMeasurement()
     double triggerDelay;
     int tdc1Enable, tdc1Edge, tdc1Output, tdc2Enable, tdc2Edge, tdc2Output;
     std::string tdc1, tdc2;
-    int rawEnabled, imageEnabled, previewEnabled;
+    int rawEnabled, imageEnabled, dataSource;
     double previewPeriod;
     std::string response, message;
     const char *functionName = "startMeasurement";
@@ -713,11 +792,11 @@ asynStatus asiTpx::startMeasurement()
 
     getIntegerParam(ASIRawEnable, &rawEnabled);
     getIntegerParam(ASIImageEnable, &imageEnabled);
-    getIntegerParam(ASIPreviewEnable, &previewEnabled);
+    getIntegerParam(ASIDataSource, &dataSource);
     getDoubleParam(ASIPreviewPeriod, &previewPeriod);
 
     /* At least one should be enabled */
-    if (!rawEnabled && !imageEnabled && !previewEnabled)
+    if (!rawEnabled && !imageEnabled && dataSource == DATA_SOURCE_NONE)
     {
         setStringParam(ADStatusMessage, "Enable at least one data output");
         return asynError;
@@ -800,6 +879,9 @@ asynStatus asiTpx::startMeasurement()
         destination["Raw"] = nlohmann::json();
     }
 
+    destination["Image"] = nlohmann::json::array();
+    destination["Preview"] = nlohmann::json();
+
     if (imageEnabled)
     {
         int mode;
@@ -810,33 +892,41 @@ asynStatus asiTpx::startMeasurement()
         getIntegerParam(ASIPixelMode, &mode);
         if (path.find("tcp://") == std::string::npos && path.find("http://") == std::string::npos)
             path = "file://" + path;
-        destination["Image"][0]["Base"] = path;
-        destination["Image"][0]["FilePattern"] = pattern;
+
+        auto userImageDestination = (nlohmann::json({
+            {"Base", path},
+            {"FilePattern", pattern},
+            {"Mode", PIXEL_MODE[mode]}
+        }));
+
         if (path.find("tcp://") == 0)
-            destination["Image"][0]["Format"] = "jsonimage";
+            userImageDestination["Format"] = "jsonimage";
         else
-            destination["Image"][0]["Format"] = "tiff";
-        destination["Image"][0]["Mode"] = PIXEL_MODE[mode];
-    }
-    else
-    {
-        destination["Image"] = nlohmann::json();
+            userImageDestination["Format"] = "tiff";
+        destination["Image"].push_back(userImageDestination);
     }
 
-    if (previewEnabled)
+    if (dataSource == DATA_SOURCE_IMAGE)
+    {
+        int mode;
+
+        getIntegerParam(ASIPixelMode, &mode);
+        destination["Image"].push_back(nlohmann::json({
+            {"Base", "tcp://connect@" + systemConfig["ImageReceiver"]["Address"].get<std::string>()},
+            {"Format", "jsonimage"},
+            {"Mode", PIXEL_MODE[mode]}
+        }));
+    }
+    else if (dataSource == DATA_SOURCE_PREVIEW)
     {
         int mode;
 
         getIntegerParam(ASIPixelMode, &mode);
         destination["Preview"]["Period"] = std::max<double>(acquirePeriod, previewPeriod);
         destination["Preview"]["SamplingMode"] = "skipOnFrame";
-        destination["Preview"]["ImageChannels"][0] = nlohmann::json({{"Base", systemConfig["Server"]["Address"]},
-                                                                     {"Format", "tiff"},
+        destination["Preview"]["ImageChannels"][0] = nlohmann::json({{"Base", std::string("tcp://connect@") + systemConfig["ImageReceiver"]["Address"].get<std::string>()},
+                                                                     {"Format", "jsonimage"},
                                                                      {"Mode", PIXEL_MODE[mode]}});
-    }
-    else
-    {
-        destination["Preview"] = nlohmann::json();
     }
 
     if (!httpClient.put("/server/destination", destination.dump(), response))
@@ -881,107 +971,84 @@ asynStatus asiTpx::stopMeasurement()
     return asynSuccess;
 }
 
-/** Read tiff image
+/**
+ * Read jsonimage message
  */
-NDArray *asiTpx::readTiffImage(TIFF *tiff)
+NDArray *asiTpx::readJsonImage(SOCKET s)
 {
-    const char *functionName = "readTiffImage";
+    const char *functionName = "readJsonImage";
 
-    epicsUInt16 bitsPerSample, sampleFormat, samplePerPixel;
-    epicsUInt32 width, height, numStrips;
+    std::string headerString;
+    char ch;
+    int n;
 
-    if (!tiff)
-    {
+    /* Read and decode json header */
+    while (true) {
+        n = recv(s, &ch, 1, 0);
+        if (n <= 0) return NULL;
+        if (ch == '\n') break;
+        headerString += ch;
+    }
+
+    nlohmann::json header;
+    size_t dataSize;
+    size_t dims[2];
+    int frameNumber;
+    double timestamp;
+    try {
+        header = nlohmann::json::parse(headerString);
+        dataSize = header["dataSize"].get<int>();
+        dims[0] = header["width"].get<int>();
+        dims[1] = header["height"].get<int>();
+        frameNumber = header["frameNumber"].get<int>();
+        timestamp = header["timeAtFrame"].get<double>();
+    } catch (std::exception &e) {
         asynPrint(this->pasynUserSelf, ASYN_TRACE_ERROR,
-                  "%s:%s: Invalid TIFF handle\n",
-                  driverName, functionName);
+            "%s:%s: Failed to parse json image header %s\n",
+            driverName, functionName, e.what());
         return NULL;
     }
 
-    TIFFGetField(tiff, TIFFTAG_IMAGEWIDTH, &width);
-    TIFFGetField(tiff, TIFFTAG_IMAGELENGTH, &height);
-    TIFFGetField(tiff, TIFFTAG_BITSPERSAMPLE, &bitsPerSample);
-    TIFFGetField(tiff, TIFFTAG_SAMPLESPERPIXEL, &samplePerPixel);
-    TIFFGetField(tiff, TIFFTAG_SAMPLEFORMAT, &sampleFormat);
-    numStrips = TIFFNumberOfStrips(tiff);
-
-    if (samplePerPixel != 1)
-    {
+    if (dataSize != dims[0] * dims[1] * sizeof(epicsUInt16)) {
         asynPrint(this->pasynUserSelf, ASYN_TRACE_ERROR,
-                  "%s:%s: Unsupported SamplePerPixel=%d\n",
-                  driverName, functionName, samplePerPixel);
+            "%s:%s: Invalid image size %zu != %zu x %zu x 2\n",
+            driverName, functionName, dataSize, dims[0], dims[1]);
         return NULL;
     }
+    NDArray *pArray = this->pNDArrayPool->alloc(2, dims, NDUInt16, 0, NULL);
+    pArray->pAttributeList->add("FrameNumber", "Frame Number", NDAttrInt32, &frameNumber);
+    pArray->timeStamp = timestamp;
 
-    size_t dims[2] = {width, height};
-    NDDataType_t dataType;
-    switch (bitsPerSample)
-    {
-    case 8:
-        dataType = (sampleFormat == 1) ? NDUInt8 : NDInt8;
-        break;
-    case 16:
-        dataType = (sampleFormat == 1) ? NDUInt16 : NDInt16;
-        break;
-    case 32:
-    {
-        switch (sampleFormat)
-        {
-        case 1:
-            dataType = NDUInt32;
-            break;
-        case 2:
-            dataType = NDInt32;
-            break;
-        default:
-            dataType = NDFloat32;
-            break;
-        }
-    }
-    break;
-    case 64:
-    {
-        switch (sampleFormat)
-        {
-        case 1:
-            dataType = NDUInt64;
-            break;
-        case 2:
-            dataType = NDInt64;
-            break;
-        default:
-            dataType = NDFloat64;
-        }
-    }
-    break;
-    default:
-        asynPrint(this->pasynUserSelf, ASYN_TRACE_ERROR,
-                  "%s:%s: Unhandled TIFF BitsPerSample=%d\n",
-                  driverName, functionName, bitsPerSample);
-        return NULL;
-    }
-
-    size_t totalSize = width * height * bitsPerSample / 8;
-    NDArray *pArray = this->pNDArrayPool->alloc(2, dims, dataType, totalSize, NULL);
-    char *buffer = (char *)pArray->pData;
-    for (epicsUInt32 strip = 0; strip < numStrips; strip++)
-    {
-        int size = TIFFReadEncodedStrip(tiff, 0, buffer, totalSize);
-        if (size == -1)
-        {
-            pArray->release();
-            pArray = NULL;
+    size_t read = 0;
+    while (read < dataSize) {
+        n = recv(s, (char*)pArray->pData + read, dataSize - read, 0);
+        if (n <= 0) {
+            char error[128];
+            epicsSocketConvertErrnoToString(error, sizeof(error));
             asynPrint(this->pasynUserSelf, ASYN_TRACE_ERROR,
-                      "%s:%s: TIFFReadEncodeStrip failed\n",
-                      driverName, functionName);
-            break;
+                "%s:%s: Failed to receive data %s\n",
+                driverName, functionName, error);
+            pArray->release();
+            return NULL;
         }
-        buffer += size;
-        totalSize -= size;
+        read += n;
+    }
+
+    /* Read and discard trailing newline */
+    n = recv(s, &ch, 1, 0);
+    if (n <= 0 || ch != '\n') {
+        char error[128];
+        epicsSocketConvertErrnoToString(error, sizeof(error));
+        asynPrint(this->pasynUserSelf, ASYN_TRACE_ERROR,
+            "%s:%s: Failed to receive trailing newline %s\n",
+            driverName, functionName, error);
+        pArray->release();
+        return NULL;
     }
 
     return pArray;
 }
+
 
 /** Configuration command, called directly or from iocsh */
 extern "C" int asiTpxConfig(const char *portName, const char *configFile,

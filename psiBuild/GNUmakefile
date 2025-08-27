@@ -9,7 +9,6 @@ USR_SYS_LIBS_Linux += tiff
 USR_SYS_LIBS_WIN32 += ws2_32
 
 SOURCES += ../asiTpxApp/src/HTTPClient.cpp
-SOURCES += ../asiTpxApp/src/tif_stream.cpp
 SOURCES += ../asiTpxApp/src/asiTpx.cpp
 
 DBDS += ../asiTpxApp/src/asiTpxSupport.dbd

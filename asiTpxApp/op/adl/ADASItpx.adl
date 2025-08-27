@@ -89,6 +89,18 @@ display {
 }
 rectangle {
 	object {
+		x=727
+		y=237
+		width=350
+		height=447
+	}
+	"basic attribute" {
+		clr=14
+		fill="outline"
+	}
+}
+rectangle {
+	object {
 		x=841
 		y=239
 		width=150
@@ -1299,18 +1311,6 @@ text {
 	textix="Data Output"
 	align="horiz. centered"
 }
-rectangle {
-	object {
-		x=727
-		y=237
-		width=350
-		height=440
-	}
-	"basic attribute" {
-		clr=14
-		fill="outline"
-	}
-}
 "text entry" {
 	object {
 		x=830
@@ -1575,39 +1575,39 @@ menu {
 }
 text {
 	object {
-		x=737
-		y=604
-		width=70
+		x=732
+		y=654
+		width=150
 		height=20
 	}
 	"basic attribute" {
 		clr=14
 	}
-	textix="Preview"
-	align="horiz. centered"
+	textix="Data Source"
+	align="horiz. right"
 }
 menu {
 	object {
-		x=832
-		y=603
-		width=64
+		x=887
+		y=653
+		width=80
 		height=20
 	}
 	control {
-		chan="$(P)$(R)PreviewEnable"
+		chan="$(P)$(R)DataSource"
 		clr=14
 		bclr=51
 	}
 }
 "text update" {
 	object {
-		x=901
-		y=605
+		x=977
+		y=655
 		width=80
 		height=18
 	}
 	monitor {
-		chan="$(P)$(R)PreviewEnable_RBV"
+		chan="$(P)$(R)DataSource_RBV"
 		clr=54
 		bclr=4
 	}
@@ -1615,40 +1615,10 @@ menu {
 	limits {
 	}
 }
-polyline {
-	object {
-		x=727
-		y=419
-		width=350
-		height=0
-	}
-	"basic attribute" {
-		clr=14
-	}
-	points {
-		(727,419)
-		(1077,419)
-	}
-}
-polyline {
-	object {
-		x=727
-		y=582
-		width=350
-		height=0
-	}
-	"basic attribute" {
-		clr=14
-	}
-	points {
-		(727,582)
-		(1077,582)
-	}
-}
 "text entry" {
 	object {
-		x=832
-		y=633
+		x=887
+		y=598
 		width=60
 		height=20
 	}
@@ -1662,8 +1632,8 @@ polyline {
 }
 "text update" {
 	object {
-		x=897
-		y=634
+		x=961
+		y=599
 		width=80
 		height=18
 	}
@@ -1677,15 +1647,15 @@ polyline {
 }
 text {
 	object {
-		x=737
-		y=633
-		width=80
+		x=732
+		y=598
+		width=150
 		height=20
 	}
 	"basic attribute" {
 		clr=14
 	}
-	textix="Period"
+	textix="Preview Period"
 	align="horiz. right"
 }
 text {
@@ -1758,4 +1728,52 @@ text {
 	clr=14
 	bclr=51
 	label="-More settings"
+}
+polyline {
+	object {
+		x=727
+		y=419
+		width=351
+		height=1
+	}
+	"basic attribute" {
+		clr=14
+		width=1
+	}
+	points {
+		(727,419)
+		(1077,419)
+	}
+}
+polyline {
+	object {
+		x=727
+		y=582
+		width=351
+		height=1
+	}
+	"basic attribute" {
+		clr=14
+		width=1
+	}
+	points {
+		(727,582)
+		(1077,582)
+	}
+}
+polyline {
+	object {
+		x=727
+		y=640
+		width=351
+		height=1
+	}
+	"basic attribute" {
+		clr=14
+		width=1
+	}
+	points {
+		(727,640)
+		(1077,640)
+	}
 }
