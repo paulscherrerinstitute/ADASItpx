@@ -992,12 +992,14 @@ NDArray *asiTpx::readJsonImage(SOCKET s)
 
     nlohmann::json header;
     size_t dataSize;
+    int bitDepth;
     size_t dims[2];
     int frameNumber;
     double timestamp;
     try {
         header = nlohmann::json::parse(headerString);
         dataSize = header["dataSize"].get<int>();
+        bitDepth = header["bitDepth"].get<int>();
         dims[0] = header["width"].get<int>();
         dims[1] = header["height"].get<int>();
         frameNumber = header["frameNumber"].get<int>();
@@ -1009,13 +1011,25 @@ NDArray *asiTpx::readJsonImage(SOCKET s)
         return NULL;
     }
 
-    if (dataSize != dims[0] * dims[1] * sizeof(epicsUInt16)) {
+    NDDataType_t dataType;
+    if (bitDepth == 16)
+        dataType = NDUInt16;
+    else if (bitDepth == 32)
+        dataType = NDUInt32;
+    else {
         asynPrint(this->pasynUserSelf, ASYN_TRACE_ERROR,
-            "%s:%s: Invalid image size %zu != %zu x %zu x 2\n",
-            driverName, functionName, dataSize, dims[0], dims[1]);
+            "%s:%s: Invalid bit depth %d\n",
+            driverName, functionName, bitDepth);
         return NULL;
     }
-    NDArray *pArray = this->pNDArrayPool->alloc(2, dims, NDUInt16, 0, NULL);
+
+    if (dataSize != dims[0] * dims[1] * bitDepth / 8) {
+        asynPrint(this->pasynUserSelf, ASYN_TRACE_ERROR,
+            "%s:%s: Invalid image size %zu != %zu x %zu x %d\n",
+            driverName, functionName, dataSize, dims[0], dims[1], bitDepth/8);
+        return NULL;
+    }
+    NDArray *pArray = this->pNDArrayPool->alloc(2, dims, dataType, 0, NULL);
     pArray->pAttributeList->add("FrameNumber", "Frame Number", NDAttrInt32, &frameNumber);
     pArray->timeStamp = timestamp;
 
