@@ -7,8 +7,8 @@ The latest untagged master branch can be obtained at https://github.com/paulsche
 Release Notes
 =============
 
-2.0.0 (August XX, 2025)
------------------------
+2.0.0 (September 9, 2025)
+-------------------------
 
 * Replace record PreviedEnable with DataSource. Choice can be None, Preview or Image.
   IOC runs a TCP server configured by the :ref:`configFile`. If Preview or Image is selected,
