@@ -79,6 +79,15 @@ Data from the Image and Preview channels can be received into NDArrays for the a
 The actual source is selected by DataSource PV. IOC runs a TCP server to receive jsonimage format data from the detector server.
 The server address is configured in the :ref:`configFile`.
 
+.. warning::
+
+  If the following conditions are met, the Serval server will send duplicate images.
+
+  * ImageEnable = Yes
+  * ImageFilePath = "tcp://connect@..."
+  * IntegrationSize != 0 or 1
+  * DataSource = Image or Preview
+
 .. cssclass:: table-bordered table-striped table-hover
 .. flat-table::
   :header-rows: 1
@@ -108,6 +117,16 @@ The server address is configured in the :ref:`configFile`.
   * - $(P)$(R)ImageFileTemplate, $(P)$(R)ImageFileTemplate_RBV
     - waveform
     - image output file name prefix
+  * - $(P)$(R)IntegrationMode, $(P)$(R)IntegrationMode_RBV
+    - mbbo, mbbi
+    - Integration mode for image output. Valid options:
+        * Sum - sum of the images
+        * Average - arithmetic mean of the images
+        * Last - any non-zero value of the new image will overwrite a pre-existing value
+  * - $(P)$(R)IntegrationSize, $(P)$(R)IntegrationSize_RBV
+    - longout, longin
+    - The number of images that were integrated into this image. 0 or 1 means no integration.
+      -1 integrates all images from the start of the acquisition.
   * - $(P)$(R)PreviewPeriod, $(P)$(R)PreviewPeriod_RBV
     - bo, bi
     - Period for preview image output.

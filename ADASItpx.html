@@ -5,10 +5,10 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="viewport" content="width=device-width, initial-scale=1" />
 
-    <title>ASI TPX driver &#8212; ADASItpx 1.2-2-g5195777 documentation</title>
+    <title>ASI TPX driver &#8212; ADASItpx 2.0 documentation</title>
     <link rel="stylesheet" type="text/css" href="_static/pygments.css?v=fa44fd50" />
     <link rel="stylesheet" type="text/css" href="_static/bootstrap-sphinx.css?v=284a2d1d" />
-    <script src="_static/documentation_options.js?v=439f6ccc"></script>
+    <script src="_static/documentation_options.js?v=60dbed4a"></script>
     <script src="_static/doctools.js?v=9bcbadda"></script>
     <script src="_static/sphinx_highlight.js?v=dc90522c"></script>
     <link rel="index" title="Index" href="genindex.html" />
@@ -35,7 +35,7 @@
         </button>
         <a class="navbar-brand" href="#">
           ADASItpx</a>
-        <span class="navbar-text navbar-version pull-left"><b>1.2-2-g5195777</b></span>
+        <span class="navbar-text navbar-version pull-left"><b>2.0</b></span>
       </div>
 
         <div class="collapse navbar-collapse nav-collapse">
@@ -228,6 +228,16 @@ On starting the measurement the server will connect to the client socket.</p></l
 <p>Data from the Image and Preview channels can be received into NDArrays for the areaDetector pipeline.
 The actual source is selected by DataSource PV. IOC runs a TCP server to receive jsonimage format data from the detector server.
 The server address is configured in the <a class="reference internal" href="#configfile"><span class="std std-ref">Configuration</span></a>.</p>
+<div class="admonition warning">
+<p class="admonition-title">Warning</p>
+<p>If the following conditions are met, the Serval server will send duplicate images.</p>
+<ul class="simple">
+<li><p>ImageEnable = Yes</p></li>
+<li><p>ImageFilePath = “<a class="reference external" href="tcp:/">tcp:/</a>/connect&#64;…”</p></li>
+<li><p>IntegrationSize != 0 or 1</p></li>
+<li><p>DataSource = Image or Preview</p></li>
+</ul>
+</div>
 <table class="table-bordered table-striped table-hover docutils align-default">
 <colgroup>
 <col style="width: 20.0%" />
@@ -268,6 +278,23 @@ The server address is configured in the <a class="reference internal" href="#con
 <tr class="row-even"><td><p>$(P)$(R)ImageFileTemplate, $(P)$(R)ImageFileTemplate_RBV</p></td>
 <td><p>waveform</p></td>
 <td><p>image output file name prefix</p></td>
+</tr>
+<tr class="row-odd"><td><p>$(P)$(R)IntegrationMode, $(P)$(R)IntegrationMode_RBV</p></td>
+<td><p>mbbo, mbbi</p></td>
+<td><dl class="simple">
+<dt>Integration mode for image output. Valid options:</dt><dd><ul class="simple">
+<li><p>Sum - sum of the images</p></li>
+<li><p>Average - arithmetic mean of the images</p></li>
+<li><p>Last - any non-zero value of the new image will overwrite a pre-existing value</p></li>
+</ul>
+</dd>
+</dl>
+</td>
+</tr>
+<tr class="row-even"><td><p>$(P)$(R)IntegrationSize, $(P)$(R)IntegrationSize_RBV</p></td>
+<td><p>longout, longin</p></td>
+<td><p>The number of images that were integrated into this image. 0 or 1 means no integration.
+-1 integrates all images from the start of the acquisition.</p></td>
 </tr>
 <tr class="row-odd"><td><p>$(P)$(R)PreviewPeriod, $(P)$(R)PreviewPeriod_RBV</p></td>
 <td><p>bo, bi</p></td>
