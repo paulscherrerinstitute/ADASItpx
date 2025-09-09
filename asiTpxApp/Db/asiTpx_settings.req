@@ -13,5 +13,7 @@ $(P)$(R)ImageEnable
 $(P)$(R)ImageFilePath
 $(P)$(R)ImageFileTemplate
 $(P)$(R)PixelMode
+$(P)$(R)IntegrationSize
+$(P)$(R)IntegrationMode
 $(P)$(R)DataSource
 $(P)$(R)PreviewPeriod

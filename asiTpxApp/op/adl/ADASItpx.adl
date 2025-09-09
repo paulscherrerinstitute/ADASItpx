@@ -6,7 +6,7 @@ file {
 display {
 	object {
 		x=1401
-		y=633
+		y=670
 		width=1100
 		height=750
 	}
@@ -92,7 +92,7 @@ rectangle {
 		x=727
 		y=237
 		width=350
-		height=447
+		height=499
 	}
 	"basic attribute" {
 		clr=14
@@ -1346,7 +1346,7 @@ text {
 "text update" {
 	object {
 		x=831
-		y=469
+		y=456
 		width=240
 		height=18
 	}
@@ -1362,7 +1362,7 @@ text {
 "text entry" {
 	object {
 		x=831
-		y=492
+		y=476
 		width=240
 		height=20
 	}
@@ -1378,7 +1378,7 @@ text {
 "text update" {
 	object {
 		x=831
-		y=522
+		y=509
 		width=120
 		height=18
 	}
@@ -1394,7 +1394,7 @@ text {
 "text entry" {
 	object {
 		x=831
-		y=545
+		y=542
 		width=120
 		height=20
 	}
@@ -1410,7 +1410,7 @@ text {
 menu {
 	object {
 		x=982
-		y=545
+		y=529
 		width=80
 		height=20
 	}
@@ -1423,7 +1423,7 @@ menu {
 "text update" {
 	object {
 		x=982
-		y=523
+		y=509
 		width=80
 		height=18
 	}
@@ -1466,7 +1466,7 @@ text {
 text {
 	object {
 		x=731
-		y=491
+		y=476
 		width=90
 		height=20
 	}
@@ -1479,7 +1479,7 @@ text {
 text {
 	object {
 		x=731
-		y=544
+		y=529
 		width=90
 		height=20
 	}
@@ -1534,7 +1534,7 @@ menu {
 text {
 	object {
 		x=737
-		y=438
+		y=425
 		width=70
 		height=20
 	}
@@ -1547,7 +1547,7 @@ text {
 menu {
 	object {
 		x=832
-		y=437
+		y=424
 		width=64
 		height=20
 	}
@@ -1560,7 +1560,7 @@ menu {
 "text update" {
 	object {
 		x=901
-		y=439
+		y=426
 		width=80
 		height=18
 	}
@@ -1576,7 +1576,7 @@ menu {
 text {
 	object {
 		x=732
-		y=654
+		y=663
 		width=150
 		height=20
 	}
@@ -1589,7 +1589,7 @@ text {
 menu {
 	object {
 		x=887
-		y=653
+		y=662
 		width=80
 		height=20
 	}
@@ -1602,7 +1602,7 @@ menu {
 "text update" {
 	object {
 		x=977
-		y=655
+		y=664
 		width=80
 		height=18
 	}
@@ -1618,7 +1618,7 @@ menu {
 "text entry" {
 	object {
 		x=887
-		y=598
+		y=703
 		width=60
 		height=20
 	}
@@ -1633,7 +1633,7 @@ menu {
 "text update" {
 	object {
 		x=961
-		y=599
+		y=704
 		width=80
 		height=18
 	}
@@ -1648,7 +1648,7 @@ menu {
 text {
 	object {
 		x=732
-		y=598
+		y=703
 		width=150
 		height=20
 	}
@@ -1716,10 +1716,10 @@ text {
 }
 "related display" {
 	object {
-		x=924
-		y=693
+		x=567
+		y=722
 		width=150
-		height=22
+		height=20
 	}
 	display[0] {
 		name="ADASItpxMore.adl"
@@ -1729,51 +1729,110 @@ text {
 	bclr=51
 	label="-More settings"
 }
-polyline {
+text {
 	object {
-		x=727
-		y=419
-		width=351
-		height=1
+		x=732
+		y=578
+		width=160
+		height=20
 	}
 	"basic attribute" {
 		clr=14
-		width=1
 	}
-	points {
-		(727,419)
-		(1077,419)
+	textix="Integration Mode"
+	align="horiz. right"
+}
+menu {
+	object {
+		x=900
+		y=577
+		width=80
+		height=20
+	}
+	control {
+		chan="$(P)$(R)IntegrationMode"
+		clr=14
+		bclr=51
 	}
 }
-polyline {
+"text update" {
 	object {
-		x=727
-		y=582
-		width=351
-		height=1
+		x=990
+		y=579
+		width=80
+		height=18
 	}
-	"basic attribute" {
-		clr=14
-		width=1
+	monitor {
+		chan="$(P)$(R)IntegrationMode_RBV"
+		clr=54
+		bclr=4
 	}
-	points {
-		(727,582)
-		(1077,582)
+	format="string"
+	limits {
 	}
 }
-polyline {
+text {
+	object {
+		x=732
+		y=610
+		width=160
+		height=20
+	}
+	"basic attribute" {
+		clr=14
+	}
+	textix="Integration Size"
+	align="horiz. right"
+}
+"text entry" {
+	object {
+		x=900
+		y=610
+		width=60
+		height=20
+	}
+	control {
+		chan="$(P)$(R)IntegrationSize"
+		clr=14
+		bclr=51
+	}
+	limits {
+	}
+}
+"text update" {
+	object {
+		x=974
+		y=611
+		width=80
+		height=18
+	}
+	monitor {
+		chan="$(P)$(R)IntegrationSize_RBV"
+		clr=54
+		bclr=4
+	}
+	limits {
+	}
+}
+rectangle {
 	object {
 		x=727
-		y=640
-		width=351
+		y=414
+		width=350
 		height=1
 	}
 	"basic attribute" {
 		clr=14
-		width=1
 	}
-	points {
-		(727,640)
-		(1077,640)
+}
+rectangle {
+	object {
+		x=727
+		y=639
+		width=350
+		height=1
+	}
+	"basic attribute" {
+		clr=14
 	}
 }

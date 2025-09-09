@@ -525,6 +525,48 @@ record(mbbi, "$(P)$(R)PixelMode_RBV")
     field(SCAN, "I/O Intr")
 }
 
+record(longout, "$(P)$(R)IntegrationSize")
+{
+    field(PINI, "YES")
+    field(DTYP, "asynInt32")
+    field(OUT,  "@asyn($(PORT),$(ADDR=0),$(TIMEOUT=1))ASI_INT_SIZE")
+    field(DRVH, "32")
+    field(DRVL, "-1")
+}
+
+record(longin, "$(P)$(R)IntegrationSize_RBV")
+{
+    field(DTYP, "asynInt32")
+    field(INP,  "@asyn($(PORT),$(ADDR=0),$(TIMEOUT=1))ASI_INT_SIZE")
+    field(SCAN, "I/O Intr")
+}
+
+record(mbbo, "$(P)$(R)IntegrationMode")
+{
+    field(PINI, "YES")
+    field(DTYP, "asynInt32")
+    field(OUT,  "@asyn($(PORT),$(ADDR=0),$(TIMEOUT=1))ASI_INT_MODE")
+    field(ZRVL, "0")
+    field(ZRST, "Sum")
+    field(ONVL, "1")
+    field(ONST, "Average")
+    field(TWVL, "2")
+    field(TWST, "Last")
+}
+
+record(mbbi, "$(P)$(R)IntegrationMode_RBV")
+{
+    field(DTYP, "asynInt32")
+    field(INP,  "@asyn($(PORT),$(ADDR=0),$(TIMEOUT=1))ASI_INT_MODE")
+    field(ZRVL, "0")
+    field(ZRST, "Sum")
+    field(ONVL, "1")
+    field(ONST, "Average")
+    field(TWVL, "2")
+    field(TWST, "Last")
+    field(SCAN, "I/O Intr")
+}
+
 record(mbbo, "$(P)$(R)DataSource")
 {
     field(PINI, "YES")

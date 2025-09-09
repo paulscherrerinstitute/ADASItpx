@@ -39,6 +39,8 @@
 #define ASIImageFilePathString      "ASI_IMG_PATH"
 #define ASIImageFileTemplateString  "ASI_IMG_TEMPLATE"
 #define ASIPixelModeString          "ASI_PX_MODE"
+#define ASIIntegrationSizeString    "ASI_INT_SIZE"
+#define ASIIntegrationModeString    "ASI_INT_MODE"
 #define ASIDataSourceString         "ASI_DATA_SOURCE"
 #define ASIPreviewPeriodString      "ASI_PREVIEW_PERIOD"
 #define ASIDroppedFramesString      "ASI_DROPPED_FRAMES"
@@ -56,6 +58,7 @@
 
 static const char *driverName = "asiTpx";
 static const char *PIXEL_MODE[] = {"count", "tot", "toa", "tof"};
+static const char *INTEGRATION_MODE[] = {"sum", "average", "last"};
 static const char *TDC_EDGE[] = {"P", "N", "PN"}; /* Rising, Falling, Both */
 static const char *TDC_OUTPUT[] = {"0123", "0", "1", "2", "3"}; /* All, Channel 0 - 3 */
 
@@ -101,6 +104,8 @@ protected:
     int ASIImageFilePath;
     int ASIImageFileTemplate;
     int ASIPixelMode;
+    int ASIIntegrationSize;
+    int ASIIntegrationMode;
     int ASIDataSource;
     int ASIPreviewPeriod;
     int ASIDroppedFrames;
@@ -157,6 +162,8 @@ asiTpx::asiTpx(const char *portName, const char *configFile, int maxBuffers, siz
     createParam(ASIImageFilePathString,     asynParamOctet, &ASIImageFilePath);
     createParam(ASIImageFileTemplateString, asynParamOctet, &ASIImageFileTemplate);
     createParam(ASIPixelModeString,         asynParamInt32, &ASIPixelMode);
+    createParam(ASIIntegrationSizeString,   asynParamInt32, &ASIIntegrationSize);
+    createParam(ASIIntegrationModeString,   asynParamInt32, &ASIIntegrationMode);
     createParam(ASIDataSourceString,        asynParamInt32, &ASIDataSource);
     createParam(ASIPreviewPeriodString,     asynParamFloat64, &ASIPreviewPeriod);
     createParam(ASIDroppedFramesString,     asynParamInt32, &ASIDroppedFrames);
@@ -765,6 +772,7 @@ asynStatus asiTpx::startMeasurement()
     int tdc1Enable, tdc1Edge, tdc1Output, tdc2Enable, tdc2Edge, tdc2Output;
     std::string tdc1, tdc2;
     int rawEnabled, imageEnabled, dataSource;
+    int mode, integrationSize, integrationMode;
     double previewPeriod;
     std::string response, message;
     const char *functionName = "startMeasurement";
@@ -794,6 +802,10 @@ asynStatus asiTpx::startMeasurement()
     getIntegerParam(ASIImageEnable, &imageEnabled);
     getIntegerParam(ASIDataSource, &dataSource);
     getDoubleParam(ASIPreviewPeriod, &previewPeriod);
+
+    getIntegerParam(ASIPixelMode, &mode);
+    getIntegerParam(ASIIntegrationSize, &integrationSize);
+    getIntegerParam(ASIIntegrationMode, &integrationMode);
 
     /* At least one should be enabled */
     if (!rawEnabled && !imageEnabled && dataSource == DATA_SOURCE_NONE)
@@ -884,49 +896,51 @@ asynStatus asiTpx::startMeasurement()
 
     if (imageEnabled)
     {
-        int mode;
         std::string path, pattern;
 
         getStringParam(ASIImageFilePath, path);
         getStringParam(ASIImageFileTemplate, pattern);
-        getIntegerParam(ASIPixelMode, &mode);
         if (path.find("tcp://") == std::string::npos && path.find("http://") == std::string::npos)
             path = "file://" + path;
 
-        auto userImageDestination = (nlohmann::json({
+        auto userImageDestination = nlohmann::json({
             {"Base", path},
             {"FilePattern", pattern},
-            {"Mode", PIXEL_MODE[mode]}
-        }));
+            {"Mode", PIXEL_MODE[mode]},
+            {"IntegrationSize", integrationSize}
+        });
+
+        if (integrationSize != 0 && integrationSize != 1)
+            userImageDestination["IntegrationMode"] = INTEGRATION_MODE[integrationMode];
 
         if (path.find("tcp://") == 0)
             userImageDestination["Format"] = "jsonimage";
         else
             userImageDestination["Format"] = "tiff";
+
         destination["Image"].push_back(userImageDestination);
     }
 
-    if (dataSource == DATA_SOURCE_IMAGE)
+    if (dataSource != DATA_SOURCE_NONE)
     {
-        int mode;
-
-        getIntegerParam(ASIPixelMode, &mode);
-        destination["Image"].push_back(nlohmann::json({
+        /* Receive Image/Preview jsonimage with the same receiver. */
+        auto internalImageDestination = nlohmann::json({
             {"Base", "tcp://connect@" + systemConfig["ImageReceiver"]["Address"].get<std::string>()},
             {"Format", "jsonimage"},
-            {"Mode", PIXEL_MODE[mode]}
-        }));
-    }
-    else if (dataSource == DATA_SOURCE_PREVIEW)
-    {
-        int mode;
+            {"Mode", PIXEL_MODE[mode]},
+            {"IntegrationSize", integrationSize}
+        });
 
-        getIntegerParam(ASIPixelMode, &mode);
-        destination["Preview"]["Period"] = std::max<double>(acquirePeriod, previewPeriod);
-        destination["Preview"]["SamplingMode"] = "skipOnFrame";
-        destination["Preview"]["ImageChannels"][0] = nlohmann::json({{"Base", std::string("tcp://connect@") + systemConfig["ImageReceiver"]["Address"].get<std::string>()},
-                                                                     {"Format", "jsonimage"},
-                                                                     {"Mode", PIXEL_MODE[mode]}});
+        if (integrationSize != 0 && integrationSize != 1)
+            internalImageDestination["IntegrationMode"] = INTEGRATION_MODE[integrationMode];
+
+        if (dataSource == DATA_SOURCE_IMAGE) {
+            destination["Image"].push_back(internalImageDestination);
+        } else if (dataSource == DATA_SOURCE_PREVIEW) {
+            destination["Preview"]["Period"] = std::max<double>(acquirePeriod, previewPeriod);
+            destination["Preview"]["SamplingMode"] = "skipOnFrame";
+            destination["Preview"]["ImageChannels"][0] = internalImageDestination;
+        }
     }
 
     if (!httpClient.put("/server/destination", destination.dump(), response))
