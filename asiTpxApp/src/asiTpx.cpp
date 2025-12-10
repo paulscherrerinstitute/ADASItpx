@@ -1026,7 +1026,9 @@ NDArray *asiTpx::readJsonImage(SOCKET s)
     }
 
     NDDataType_t dataType;
-    if (bitDepth == 16)
+    if (bitDepth == 8)
+        dataType = NDUInt8;
+    else if (bitDepth == 16)
         dataType = NDUInt16;
     else if (bitDepth == 32)
         dataType = NDUInt32;
