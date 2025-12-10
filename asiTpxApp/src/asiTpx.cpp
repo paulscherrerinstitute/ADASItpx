@@ -61,6 +61,7 @@ static const char *PIXEL_MODE[] = {"count", "tot", "toa", "tof"};
 static const char *INTEGRATION_MODE[] = {"sum", "average", "last"};
 static const char *TDC_EDGE[] = {"P", "N", "PN"}; /* Rising, Falling, Both */
 static const char *TDC_OUTPUT[] = {"0123", "0", "1", "2", "3"}; /* All, Channel 0 - 3 */
+static const int POLLING_INTERVAL = 0.1; /* seconds */
 
 static void asiTpxAcquisitionTaskC(void *drvPvt);
 static void asiTpxPollTaskC(void *drvPvt);
@@ -381,12 +382,11 @@ void asiTpx::asiTpxAcquisitionTask()
         /* Call the callbacks to update any changes */
         callParamCallbacks();
 
-        /* Sync polling frequency with acquisitio period */
+        /* Polling frequency capped by server response time but no faster than POLLING_INTERVAL */
         epicsTimeGetCurrent(&endTime);
         double elapsedTime = epicsTimeDiffInSeconds(&endTime, &startTime);
-        double delay = acquirePeriod - elapsedTime;
-        if (delay > 0.0)
-            epicsThreadSleep(delay);
+        if (acquire)
+            epicsThreadSleep(std::max<double>(POLLING_INTERVAL, elapsedTime * 2));
     }
 }
 
