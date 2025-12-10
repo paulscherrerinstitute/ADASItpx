@@ -1076,6 +1076,19 @@ NDArray *asiTpx::readJsonImage(SOCKET s)
         return NULL;
     }
 
+    /* Byte order change from network order (big endian) to host order */
+    NDArrayInfo arrayInfo;
+    pArray->getInfo(&arrayInfo);
+    if (dataType == NDUInt16) {
+        epicsUInt16 *data = (epicsUInt16 *)pArray->pData;
+        for (size_t i=0; i<arrayInfo.nElements; i++)
+            data[i] = ntohs(data[i]);
+    } else if (dataType == NDUInt32) {
+        epicsUInt32 *data = (epicsUInt32 *)pArray->pData;
+        for (size_t i=0; i<arrayInfo.nElements; i++)
+            data[i] = ntohl(data[i]);
+    }
+
     return pArray;
 }
 
