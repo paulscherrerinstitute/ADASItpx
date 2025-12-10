@@ -24,7 +24,7 @@
 #include <iocsh.h>
 #include <epicsExport.h>
 
-#define DRIVER_VERSION "1.0.0"
+#define DRIVER_VERSION "2.1.0"
 
 #define ASIExposureModeString       "ASI_EXP_MODE"
 #define ASITriggerSoftwareString    "ASI_TRIGGER_SOFT"
@@ -61,6 +61,7 @@ static const char *PIXEL_MODE[] = {"count", "tot", "toa", "tof"};
 static const char *INTEGRATION_MODE[] = {"sum", "average", "last"};
 static const char *TDC_EDGE[] = {"P", "N", "PN"}; /* Rising, Falling, Both */
 static const char *TDC_OUTPUT[] = {"0123", "0", "1", "2", "3"}; /* All, Channel 0 - 3 */
+static const int POLLING_INTERVAL = 0.1; /* seconds */
 
 static void asiTpxAcquisitionTaskC(void *drvPvt);
 static void asiTpxPollTaskC(void *drvPvt);
@@ -381,12 +382,11 @@ void asiTpx::asiTpxAcquisitionTask()
         /* Call the callbacks to update any changes */
         callParamCallbacks();
 
-        /* Sync polling frequency with acquisitio period */
+        /* Polling frequency capped by server response time but no faster than POLLING_INTERVAL */
         epicsTimeGetCurrent(&endTime);
         double elapsedTime = epicsTimeDiffInSeconds(&endTime, &startTime);
-        double delay = acquirePeriod - elapsedTime;
-        if (delay > 0.0)
-            epicsThreadSleep(delay);
+        if (acquire)
+            epicsThreadSleep(std::max<double>(POLLING_INTERVAL, elapsedTime * 2));
     }
 }
 
@@ -1026,7 +1026,9 @@ NDArray *asiTpx::readJsonImage(SOCKET s)
     }
 
     NDDataType_t dataType;
-    if (bitDepth == 16)
+    if (bitDepth == 8)
+        dataType = NDUInt8;
+    else if (bitDepth == 16)
         dataType = NDUInt16;
     else if (bitDepth == 32)
         dataType = NDUInt32;
@@ -1072,6 +1074,19 @@ NDArray *asiTpx::readJsonImage(SOCKET s)
             driverName, functionName, error);
         pArray->release();
         return NULL;
+    }
+
+    /* Byte order change from network order (big endian) to host order */
+    NDArrayInfo arrayInfo;
+    pArray->getInfo(&arrayInfo);
+    if (dataType == NDUInt16) {
+        epicsUInt16 *data = (epicsUInt16 *)pArray->pData;
+        for (size_t i=0; i<arrayInfo.nElements; i++)
+            data[i] = ntohs(data[i]);
+    } else if (dataType == NDUInt32) {
+        epicsUInt32 *data = (epicsUInt32 *)pArray->pData;
+        for (size_t i=0; i<arrayInfo.nElements; i++)
+            data[i] = ntohl(data[i]);
     }
 
     return pArray;
