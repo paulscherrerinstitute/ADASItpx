@@ -24,7 +24,7 @@
 #include <iocsh.h>
 #include <epicsExport.h>
 
-#define DRIVER_VERSION "1.0.0"
+#define DRIVER_VERSION "2.1.0"
 
 #define ASIExposureModeString       "ASI_EXP_MODE"
 #define ASITriggerSoftwareString    "ASI_TRIGGER_SOFT"
