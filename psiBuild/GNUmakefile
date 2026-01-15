@@ -1,11 +1,10 @@
 include /ioc/tools/driver.makefile
 PROJECT = ADASItpx
 BUILDCLASSES = Linux WIN32
-ARCH_FILTER = ${EPICS_HOST_ARCH} win%
+ARCH_FILTER = RHEL% deb% win%
 EXCLUDE_VERSIONS = 3
 
 USR_CXXFLAGS_Linux += -std=c++11
-USR_SYS_LIBS_Linux += tiff
 USR_SYS_LIBS_WIN32 += ws2_32
 
 SOURCES += ../asiTpxApp/src/HTTPClient.cpp
