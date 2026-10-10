@@ -816,6 +816,8 @@ asynStatus asiTpx::startMeasurement()
 
     /* Configure detector */
     auto config = nlohmann::json::object();
+    if (httpClient.get("/detector/config", response))
+        config = nlohmann::json::parse(response);
     config["ExposureTime"] = acquireTime;
     config["TriggerPeriod"] = acquirePeriod;
     config["nTriggers"] = (imageMode == ADImageSingle) ? 1 : numImages;
