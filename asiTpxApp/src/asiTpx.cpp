@@ -44,6 +44,9 @@
 #define ASIDataSourceString         "ASI_DATA_SOURCE"
 #define ASIPreviewPeriodString      "ASI_PREVIEW_PERIOD"
 #define ASIDroppedFramesString      "ASI_DROPPED_FRAMES"
+#define ASIBiasEnableString         "ASI_BIAS_ENABLE"
+#define ASIBiasVoltageString        "ASI_BIAS_VOLT"
+#define ASIChainModeString          "ASI_CHAIN_MODE"
 #define ASITDC1EnableString         "ASI_TDC1_ENABLE"
 #define ASITDC1EdgeString           "ASI_TDC1_EDGE"
 #define ASITDC1OutputString         "ASI_TDC1_OUT"
@@ -59,6 +62,7 @@
 static const char *driverName = "asiTpx";
 static const char *PIXEL_MODE[] = {"count", "tot", "toa", "tof"};
 static const char *INTEGRATION_MODE[] = {"sum", "average", "last"};
+static const char *CHAIN_MODE[] = {"NONE", "LEADER", "FOLLOWER"};
 static const char *TDC_EDGE[] = {"P", "N", "PN"}; /* Rising, Falling, Both */
 static const char *TDC_OUTPUT[] = {"0123", "0", "1", "2", "3"}; /* All, Channel 0 - 3 */
 static const int POLLING_INTERVAL = 0.1; /* seconds */
@@ -110,6 +114,9 @@ protected:
     int ASIDataSource;
     int ASIPreviewPeriod;
     int ASIDroppedFrames;
+    int ASIBiasEnable;
+    int ASIBiasVoltage;
+    int ASIChainMode;
     int ASITDC1Enable;
     int ASITDC1Edge;
     int ASITDC1Output;
@@ -168,6 +175,9 @@ asiTpx::asiTpx(const char *portName, const char *configFile, int maxBuffers, siz
     createParam(ASIDataSourceString,        asynParamInt32, &ASIDataSource);
     createParam(ASIPreviewPeriodString,     asynParamFloat64, &ASIPreviewPeriod);
     createParam(ASIDroppedFramesString,     asynParamInt32, &ASIDroppedFrames);
+    createParam(ASIBiasEnableString,       asynParamInt32, &ASIBiasEnable);
+    createParam(ASIBiasVoltageString,      asynParamFloat64, &ASIBiasVoltage);
+    createParam(ASIChainModeString,        asynParamInt32, &ASIChainMode);
     createParam(ASITDC1EnableString,       asynParamInt32, &ASITDC1Enable);
     createParam(ASITDC1EdgeString,         asynParamInt32, &ASITDC1Edge);
     createParam(ASITDC1OutputString,       asynParamInt32, &ASITDC1Output);
@@ -769,6 +779,9 @@ asynStatus asiTpx::startMeasurement()
     int imageMode, numImages;
     int triggerMode, exposureMode, triggerPolarity, triggerIn, triggerOut;
     double triggerDelay;
+    int biasEnable;
+    double biasVoltage;
+    int chainMode;
     int tdc1Enable, tdc1Edge, tdc1Output, tdc2Enable, tdc2Edge, tdc2Output;
     std::string tdc1, tdc2;
     int rawEnabled, imageEnabled, dataSource;
@@ -787,6 +800,11 @@ asynStatus asiTpx::startMeasurement()
     getDoubleParam(ASITriggerDelay, &triggerDelay);
     getIntegerParam(ASITriggerIn, &triggerIn);
     getIntegerParam(ASITriggerOut, &triggerOut);
+
+    getIntegerParam(ASIBiasEnable, &biasEnable);
+    getDoubleParam(ASIBiasVoltage, &biasVoltage);
+
+    getIntegerParam(ASIChainMode, &chainMode);
 
     getIntegerParam(ASITDC1Enable, &tdc1Enable);
     getIntegerParam(ASITDC1Edge, &tdc1Edge);
@@ -819,6 +837,9 @@ asynStatus asiTpx::startMeasurement()
     if (httpClient.get("/detector/config", response))
         config = nlohmann::json::parse(response);
     config["ExposureTime"] = acquireTime;
+    config["BiasEnabled"] = biasEnable;
+    config["BiasVoltage"] = biasVoltage;
+    config["ChainMode"] = CHAIN_MODE[chainMode];
     config["TriggerPeriod"] = acquirePeriod;
     config["nTriggers"] = (imageMode == ADImageSingle) ? 1 : numImages;
     config["TriggerDelay"] = triggerDelay;

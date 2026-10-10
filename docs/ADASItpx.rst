@@ -33,6 +33,19 @@ Detector settings
   * - EPICS record name
     - EPICS record type
     - Description
+  * - $(P)$(R)BiasEnable, $(P)$(R)BiasEnable_RBV
+    - bo, bi
+    - Enable bias setting
+  * - $(P)$(R)BiasVoltage, $(P)$(R)BiasVoltage_RBV
+    - ao, ai
+    - Bias setting
+  * - $(P)$(R)ChainMode, $(P)$(R)ChainMode_RBV
+    - mbbo, mbbi
+    - How this detector synchronizes with another one.
+
+      - None
+      - Leader
+      - Follower
   * - :cspan:`2` TDC *n* (n = 0, 1) recording
   * - $(P)$(R)TDC *n* Enable, $(P)$(R)TDC *n* Enable_RBV
     - bo, bi

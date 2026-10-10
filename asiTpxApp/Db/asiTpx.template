@@ -184,6 +184,68 @@ record(mbbi, "$(P)$(R)TriggerOutput_RBV")
 
 ############ Detector Settings #########
 
+record(bo, "$(P)$(R)BiasEnable")
+{
+    field(PINI, "YES")
+    field(DTYP, "asynInt32")
+    field(OUT,  "@asyn($(PORT),$(ADDR=0),$(TIMEOUT=1))ASI_BIAS_ENABLE")
+    field(ZNAM, "No")
+    field(ONAM, "Yes")
+    field(VAL,  "0")
+}
+
+record(bi, "$(P)$(R)BiasEnable_RBV")
+{
+    field(DTYP, "asynInt32")
+    field(INP,  "@asyn($(PORT),$(ADDR=0),$(TIMEOUT=1))ASI_BIAS_ENABLE")
+    field(ZNAM, "No")
+    field(ONAM, "Yes")
+    field(SCAN, "I/O Intr")
+}
+
+record(ao, "$(P)$(R)BiasVoltage")
+{
+    field(PINI, "YES")
+    field(DTYP, "asynFloat64")
+    field(OUT,  "@asyn($(PORT),$(ADDR=0),$(TIMEOUT=1))ASI_BIAS_VOLT")
+    field(EGU , "V")
+    field(VAL,  "0")
+}
+
+record(ai, "$(P)$(R)BiasVoltage_RBV")
+{
+    field(DTYP, "asynFloat64")
+    field(INP,  "@asyn($(PORT),$(ADDR=0),$(TIMEOUT=1))ASI_BIAS_VOLT")
+    field(EGU , "V")
+    field(SCAN, "I/O Intr")
+}
+
+record(mbbo, "$(P)$(R)ChainMode")
+{
+    field(PINI, "YES")
+    field(DTYP, "asynInt32")
+    field(OUT,  "@asyn($(PORT),$(ADDR=0),$(TIMEOUT=1))ASI_CHAIN_MODE")
+    field(ZRVL, "0")
+    field(ZRST, "None")
+    field(ONVL, "1")
+    field(ONST, "Leader")
+    field(TWVL, "2")
+    field(TWST, "Follower")
+}
+
+record(mbbi, "$(P)$(R)ChainMode_RBV")
+{
+    field(DTYP, "asynInt32")
+    field(INP,  "@asyn($(PORT),$(ADDR=0),$(TIMEOUT=1))ASI_CHAIN_MODE")
+    field(ZRVL, "0")
+    field(ZRST, "None")
+    field(ONVL, "1")
+    field(ONST, "Leader")
+    field(TWVL, "2")
+    field(TWST, "Follower")
+    field(SCAN, "I/O Intr")
+}
+
 record(bo, "$(P)$(R)TDC1Enable")
 {
     field(PINI, "YES")

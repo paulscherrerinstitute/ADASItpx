@@ -1,4 +1,7 @@
 file "ADBase_settings.req", P=$(P), R=$(R)
+$(P)$(R)BiasEnable
+$(P)$(R)BiasVoltage
+$(P)$(R)ChainMode
 $(P)$(R)TDC1Enable
 $(P)$(R)TDC1Edge
 $(P)$(R)TDC1Output
