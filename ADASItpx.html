@@ -5,12 +5,12 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="viewport" content="width=device-width, initial-scale=1" />
 
-    <title>ASI TPX driver &#8212; ADASItpx 2.0 documentation</title>
+    <title>ASI TPX driver &#8212; ADASItpx 2.2 documentation</title>
     <link rel="stylesheet" type="text/css" href="_static/pygments.css?v=fa44fd50" />
     <link rel="stylesheet" type="text/css" href="_static/bootstrap-sphinx.css?v=284a2d1d" />
-    <script src="_static/documentation_options.js?v=60dbed4a"></script>
-    <script src="_static/doctools.js?v=9bcbadda"></script>
-    <script src="_static/sphinx_highlight.js?v=dc90522c"></script>
+    <script src="_static/documentation_options.js?v=f35be339"></script>
+    <script src="_static/doctools.js?v=fd6eb6e6"></script>
+    <script src="_static/sphinx_highlight.js?v=6ffebe34"></script>
     <link rel="index" title="Index" href="genindex.html" />
     <link rel="search" title="Search" href="search.html" />
 <meta charset='utf-8'>
@@ -35,7 +35,7 @@
         </button>
         <a class="navbar-brand" href="#">
           ADASItpx</a>
-        <span class="navbar-text navbar-version pull-left"><b>2.0</b></span>
+        <span class="navbar-text navbar-version pull-left"><b>2.2</b></span>
       </div>
 
         <div class="collapse navbar-collapse nav-collapse">
@@ -173,13 +173,31 @@ to those in <a class="reference external" href="https://areadetector.github.io/m
 </tr>
 </thead>
 <tbody>
-<tr class="row-even"><td colspan="3"><p> TDC <em>n</em> (n = 0, 1) recording</p></td>
+<tr class="row-even"><td><p>$(P)$(R)BiasEnable, $(P)$(R)BiasEnable_RBV</p></td>
+<td><p>bo, bi</p></td>
+<td><p>Enable bias setting</p></td>
 </tr>
-<tr class="row-odd"><td><p>$(P)$(R)TDC <em>n</em> Enable, $(P)$(R)TDC <em>n</em> Enable_RBV</p></td>
+<tr class="row-odd"><td><p>$(P)$(R)BiasVoltage, $(P)$(R)BiasVoltage_RBV</p></td>
+<td><p>ao, ai</p></td>
+<td><p>Bias setting</p></td>
+</tr>
+<tr class="row-even"><td><p>$(P)$(R)ChainMode, $(P)$(R)ChainMode_RBV</p></td>
+<td><p>mbbo, mbbi</p></td>
+<td><p>How this detector synchronizes with another one.</p>
+<ul class="simple">
+<li><p>None</p></li>
+<li><p>Leader</p></li>
+<li><p>Follower</p></li>
+</ul>
+</td>
+</tr>
+<tr class="row-odd"><td colspan="3"><p> TDC <em>n</em> (n = 0, 1) recording</p></td>
+</tr>
+<tr class="row-even"><td><p>$(P)$(R)TDC <em>n</em> Enable, $(P)$(R)TDC <em>n</em> Enable_RBV</p></td>
 <td><p>bo, bi</p></td>
 <td><p>Enable TDC <em>n</em> recording</p></td>
 </tr>
-<tr class="row-even"><td><p>$(P)$(R)TDC <em>n</em> Edge, $(P)$(R)TDC <em>n</em> Edge_RBV</p></td>
+<tr class="row-odd"><td><p>$(P)$(R)TDC <em>n</em> Edge, $(P)$(R)TDC <em>n</em> Edge_RBV</p></td>
 <td><p>mbbo, mbbi</p></td>
 <td><p>Record TDC <em>n</em> edge,</p>
 <ul class="simple">
@@ -189,7 +207,7 @@ to those in <a class="reference external" href="https://areadetector.github.io/m
 </ul>
 </td>
 </tr>
-<tr class="row-odd"><td><p>$(P)$(R)TDC <em>n</em> Output, $(P)$(R)TDC <em>n</em> Output_RBV</p></td>
+<tr class="row-even"><td><p>$(P)$(R)TDC <em>n</em> Output, $(P)$(R)TDC <em>n</em> Output_RBV</p></td>
 <td><p>mbbo, mbbi</p></td>
 <td><p>Record TDC <em>n</em> channels,</p>
 <ul class="simple">
@@ -437,7 +455,7 @@ to $(P)$(R)TriggerSoftware</p></td>
     </p>
     <p>
         &copy; Copyright 2025, Xiaoqiang Wang.<br/>
-      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 8.2.3.<br/>
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 9.1.0.<br/>
     </p>
   </div>
 </footer>
