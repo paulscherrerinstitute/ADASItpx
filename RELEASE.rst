@@ -7,6 +7,13 @@ The latest untagged master branch can be obtained at https://github.com/paulsche
 Release Notes
 =============
 
+2.2.0 (October 10, 2026)
+--------------------------
+* Previously detector config parameters not controlled via EPICS are always set to their defaults.
+  User has no means to control them. Now they are preserved.
+* Add bias control.
+* Add setting of chain mode.
+
 2.1.0 (December 10, 2025)
 ------------------------
 * jsonimage data (big endian) is converted to match host endianess.
